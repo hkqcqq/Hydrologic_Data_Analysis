@@ -18,6 +18,9 @@ What makes an effective data visualization? What are the essential components/ch
 
 Come up with a consensus list among your group members. 
 
+Tables, charts
+accessible and attravtive and logical color palettes; units; axis lables; legible front sizes; data point sizes-large/small enough; headline(context-dependent); appropriate graph type; axis scales; interactive?
+
 Compare your list to other groups' lists. 
 
 ## Exploring web resources for visualization
@@ -25,16 +28,16 @@ Compare your list to other groups' lists.
 1. Navigate to https://www.data-to-viz.com/.
 2. Think of a dataset that you or someone in your field might want to visualize. What types of variables does this dataset contain? What information might you want to convey with a visualization?
 
-<add notes here>
+<add notes here> Precipitation among the whole country. The amount of precipitation and the states or cities, columns or circles. It will be more easy for people compare the precipitation of different states or cities.
 
 3. Scroll to the "Explore" section of the website. Follow the flow chart to find a type of graph that would suit your data. Click for more information and a link to the R Graph Gallery. If there are multiple options for graphing your data, how might you choose between them?
 
-<add notes here> 
+<add notes here> Bubble map.
 
 4. Discuss and compare your findings with a partner.
 5. Scroll further down to the "Caveats" section of the website and click "See the Collection." Choose five topics to explore (some of these are incomplete so choose another if that is the case). Write some notes about what you learned below. 
 
-<add notes here>
+<add notes here> The problem with dual axes; Calculation errors; Barplots with racial coordinates; Connet you dots; Overplotting.
 
 6. Discuss and compare your findings with a partner.
 
@@ -75,10 +78,10 @@ pal_futurama (function; comes in the ggsci package)
 ```{r}
 getwd()
 
-#install.packages(tidyverse)
-#install.packages(dataRetrieval)
-#install.packages(zoo)
-#install.packages(ggrepel)
+#install.packages("tidyverse")
+#install.packages("dataRetrieval")
+#install.packages("zoo")
+#install.packages("ggrepel")
 
 library(tidyverse)
 library(dataRetrieval)
