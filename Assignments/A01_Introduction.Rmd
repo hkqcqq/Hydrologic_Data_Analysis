@@ -1,0 +1,92 @@
+---
+title: "Assignment 1: Introduction"
+author: "Student Name"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## OVERVIEW
+
+This exercise accompanies the lessons in Hydrologic Data Analysis on introductory material. 
+
+## Directions
+1. Change "Student Name" on line 3 (above) with your name.
+3. Work through the steps, **creating code and output** that fulfill each instruction.
+4. Be sure to **answer the questions** in this assignment document (marked with >).
+6. When you have completed the assignment, **Knit** the text and code into a single PDF file.
+8. After Knitting, submit the completed exercise (PDF file) to the dropbox in Sakai. Add your last name into the file name (e.g., "FILENAME") prior to submission.
+
+The completed exercise is due on 2019-09-04 before class begins.
+
+## Course Setup
+1. Post the link to your forked GitHub repository below. Your repo should include one or more commits and an edited README file.  
+
+>  Link:
+
+2. Complete the Consent Form in Sakai. You must choose to either opt in or out of the research study being conducted in our course.
+
+Did you complete the form? (yes/no)
+
+> 
+
+## Course Project
+
+3. What are some topics in aquatic science that are particularly interesting to you?
+
+> ANSWER: 
+
+4. Are there specific people in class who you would specifically like to have on your team?
+
+> ANSWER: 
+
+5. Are there specific people in class who you would specifically *not* like to have on your team?
+
+> ANSWER: 
+
+## Data Visualization Exercises
+
+6. Set up your work session. Check your working directory, load packages `tidyverse`,  `dataRetrieval`, and `lubridate`. Set your ggplot theme as theme_classic (you may need to look up how to set your theme).
+
+```{r, message = FALSE}
+
+```
+
+7. Upload discharge data for the Eno River at site 02096500 for the same dates as we studied in class (2009-08-01 through 2019-07-31). Obtain data for discharge and gage height (you will need to look up these parameter codes). Rename the columns with informative titles. Imperial units can be retained (no need to change to metric).
+
+```{r}
+
+```
+
+8. Add a "year" column to your data frame (hint: lubridate has a `year` function).
+
+```{r}
+
+```
+
+9. Create a ggplot of discharge vs. gage height, with gage height as the x axis. Color each point by year. Make the following edits to follow good data visualization practices: 
+
+* Edit axes with units
+* Change color palette from ggplot default
+* Make points 50 % transparent
+
+```{r}
+
+```
+
+10. Interpret the graph you made. Write 2-3 sentences communicating the main takeaway points. 
+
+> ANSWER: 
+
+11. Create a ggplot violin plot of discharge, divided by year. (Hint: in your aesthetics, specify year as a factor rather than a continuous variable). Make the following edits to follow good data visualization practices: 
+
+* Remove x axis label
+* Add a horizontal line at the 0.5 quantile within each violin (hint: draw_quantiles)
+```{r}
+
+```
+
+12. Interpret the graph you made. Write 2-3 sentences communicating the main takeaway points. 
+
+> ANSWER: 
