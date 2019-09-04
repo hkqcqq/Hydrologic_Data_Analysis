@@ -7,7 +7,7 @@ geometry: margin=2.54cm
 editor_options: 
   chunk_output_type: console
 ---
-
+a
 ## Lesson Objectives
 1. Investigate the concepts of lake stratification and mixing by analyzing monitoring data
 2. Apply data analytics skills to applied questions about physical properties of lakes
