@@ -251,3 +251,4 @@ Why does mixing occur in the spring and fall? What are the mechanisms that make 
 ## Closing Discussion
 
 What are the main concepts you learned about the physical properties of lakes today? What was the evidence for these concepts in the dataset?
+epilimnion, hypolimnion, metalimnion or thermocline
