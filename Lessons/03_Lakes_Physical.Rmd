@@ -7,7 +7,7 @@ geometry: margin=2.54cm
 editor_options: 
   chunk_output_type: console
 ---
-a
+
 ## Lesson Objectives
 1. Investigate the concepts of lake stratification and mixing by analyzing monitoring data
 2. Apply data analytics skills to applied questions about physical properties of lakes
@@ -15,7 +15,7 @@ a
 
 ## Opening Discussion
 What is a lake? How does this differ from a stream, river, or wetland?
-
+the depth of water, vegetation
 What are the physical properties of lakes?
 
 ## Session Set Up
@@ -88,7 +88,7 @@ unique(Peterdata$depth)
 unique(Tuesdaydata$depth)
 # Why didn't we use the "summary" function here?
 ```
-
+do not need the distribution
 ### Exploratory data visualization
 
 Let's make a plot of temperatures by depth. There are a lot of points, so adding a 50 % transparency to the points helps us see where points are densely clustered together.
@@ -155,7 +155,7 @@ print(Tempplot.thermocline)
 ```
 
 Why can't we use a line graph here?
-<add notes here>
+<add notes here>there is break between year
 ```{r}
 Tempplot.line <- 
   ggplot(Pauldata.surface, aes(x = sampledate, y = temperature_C)) +
@@ -212,7 +212,7 @@ print(TempprofileAug2016)
 <add notes here>
 
 In some places, the lines are not consistently smooth. What's going on here? How does this differ from your expectations of what the data should look like?
-<add notes here>
+<add notes here>current etc
 
 If you were to explain this graph to someone who didn't know anything about lakes, how would you describe it? Write your answer below. 
 
@@ -242,7 +242,7 @@ Paul Lake, like many lakes in temperate climates, is **dimictic**. What does thi
 
 Let's put your prediction to the test. In 1993, the lake was sampled in November. Wrangle your data to capture this date and create a profile graph of that date.
 ```{r}
-
+wind and density gradiant
 ```
 
 Why does mixing occur in the spring and fall? What are the mechanisms that make this possible?
