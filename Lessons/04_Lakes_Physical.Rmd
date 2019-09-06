@@ -1,0 +1,137 @@
+---
+title: "4: Physical Properties of Lakes"
+author: "Hydrologic Data Analysis | Kateri Salk"
+date: "Fall 2019"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## Lesson Objectives
+1. Investigate the relationships between temperature, light, and oxygen in lakes by analyzing monitoring data
+2. Analyze changes in lake surface temperatures over time
+3. Apply data analytics skills to questions about physical properties of lakes
+4. Communicate findings with peers through oral, visual, and written modes
+
+## Opening Discussion
+We analyzed temperature profiles and seasonal changes on Wednesday. What were some key takeaway points about thermal stratification and mixing?
+
+## Session Set Up
+```{r, message = FALSE}
+getwd()
+
+library(tidyverse)
+library(gridExtra)
+library(cowplot)
+library(lubridate)
+
+NTLdata <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
+
+theme_set(theme_classic())
+
+```
+
+## Data Wrangling and Exploration
+
+### Investigate structure of dataset
+
+```{r}
+# Change sampledate to Date
+NTLdata$sampledate <- as.Date(NTLdata$sampledate, "%m/%d/%y")
+
+# Make three data frames, one for each lake
+Pauldata <- filter(NTLdata, lakename == "Paul Lake")
+Peterdata <- filter(NTLdata, lakename == "Peter Lake")
+Tuesdaydata <- filter(NTLdata, lakename == "Tuesday Lake")
+
+# Make a data frame to inspect 2016 data for Paul Lake
+Pauldata.2016 <- filter(Pauldata, year4 == 2016)
+
+```
+
+### Data Visualization
+
+Let's look at profiles of temperature, irradiance, and dissolved oxygen over the course of a season. We will use the `plot_grid` function from the cowplot package to put the graphs together on one plot. Pay attention to the differences among the formats of each plot and how these work together in the final plot. 
+
+```{r}
+Tempprofiles2016 <- 
+  ggplot(Pauldata.2016, aes(x = temperature_C, y = depth, color = daynum)) +
+  geom_point() +
+  scale_y_reverse() +
+  scale_x_continuous(position = "top") +
+  scale_color_viridis_c(end = 0.8, option = "magma") +
+  labs(x = expression("Temperature "(degree*C)), y = "Depth (m)") +
+  theme(legend.position = "none")
+print(Tempprofiles2016)
+
+Lightprofiles2016 <- 
+  ggplot(Pauldata.2016, aes(x = irradianceWater, y = depth, color = daynum)) +
+  geom_point() +
+  scale_y_reverse() +
+  scale_x_continuous(position = "top") +
+  scale_color_viridis_c(end = 0.8, option = "magma") +
+  labs(x = expression("Irradiance (W m"^-2*")"), y = "Depth (m)") +
+  theme(legend.position = "none", 
+        axis.text.y = element_blank(), axis.title.y = element_blank())
+print(Lightprofiles2016)
+
+Oxygenprofiles2016 <- 
+  ggplot(Pauldata.2016, aes(x = dissolvedOxygen, y = depth, color = daynum)) +
+  geom_point() +
+  scale_y_reverse() +
+  scale_x_continuous(position = "top") +
+  scale_color_viridis_c(end = 0.8, option = "magma") +
+  labs(x = expression("DO (mg L"^-1*")"), y = "Depth (m)", 
+       color = "Julian Day") +
+  theme(axis.text.y = element_blank(), axis.title.y = element_blank())
+print(Oxygenprofiles2016)
+
+Physicalprofiles2016 <- 
+  plot_grid(Tempprofiles2016, Lightprofiles2016, Oxygenprofiles2016, 
+            ncol = 3, rel_widths = c(1.25, 1, 1.5))
+print(Physicalprofiles2016)
+
+```
+
+How do temperature profiles vary over the course of a season? What are the mechanisms for this pattern?
+
+> 
+
+How do irradiance profiles vary over the course of a season? What are the mechanisms for this pattern?
+
+> 
+
+How do dissolved oxygen profiles vary over the course of a season? What are the mechanisms for this pattern?
+
+> 
+
+
+## Data Analysis
+
+### Long-term change in temperature
+How much have surface temperatures increased over the period of study? Is this increase significant? Isolate surface depths and run the test for May, June, July, and August temperatures separately. Use a linear regression with year as the predictor variable and temperature as the response variable.
+
+Steps: 
+
+1. Add a column named "Month" to the data frame (hint: lubridate package)
+2. Filter your data frame so that it only contains surface depths and months 5-8
+3. Create 4 separate data frames, one for each month
+4. Run a linear regression for each data frame (see instructions above)
+5. For significant trends, calculate how many degrees the lake has warmed over the period of study
+5. Create a ggplot of surface temps by date and facet by month. Add `geom_smooth(se = FALSE, method = lm)` to the plot to display the regression line.
+
+```{r}
+
+
+
+```
+
+Summarize your results below. How would you explain your findings and the importance of these findings to a non-specialist audience while still employing the data and statistical results?
+
+>
+
+## Closing Discussion
+How do warming surface waters impact the physical properties of a lake? How might this affect the ecology of the lake?
+
+How do we reconcile large amounts of variability in long-term records?

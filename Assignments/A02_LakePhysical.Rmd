@@ -1,0 +1,83 @@
+---
+title: "Assignment 2: Physical Properties of Lakes"
+author: "Student Name"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## OVERVIEW
+
+This exercise accompanies the lessons in Hydrologic Data Analysis on the physical properties of lakes. 
+
+## Directions
+1. Change "Student Name" on line 3 (above) with your name.
+3. Work through the steps, **creating code and output** that fulfill each instruction.
+4. Be sure to **answer the questions** in this assignment document.
+6. When you have completed the assignment, **Knit** the text and code into a single PDF file.
+8. After Knitting, submit the completed exercise (PDF file) to the dropbox in Sakai. Add your last name into the file name (e.g., "Salk_A02_LakePhysical.Rmd") prior to submission.
+
+The completed exercise is due on 11 September 2019 at 9:00 am.
+
+## Setup
+
+1. Verify your working directory is set to the R project file, 
+2. Load the tidyverse, lubridate, and cowplot packages
+3. Import the NTL-LTER physical lake dataset and set the date column to the date format
+4. Set your ggplot theme (can be theme_classic or something else)
+
+```{r}
+
+```
+
+## Creating and analyzing lake temperature profiles
+
+### Single lake, multiple dates
+
+5. Choose either Peter or Tuesday Lake. Create a new data frame that wrangles the full data frame so that it only includes that lake during two different years (one year from the early part of the dataset and one year from the late part of the dataset).
+
+```{r}
+
+```
+
+6. Create three graphs: (1) temperature profiles for the early year, (2) temperature profiles for the late year, and (3) a `plot_grid` of the two graphs together. Choose `geom_point` and color your points by date. 
+
+Remember to edit your graphs so they follow good data visualization practices.
+
+```{r}
+
+```
+
+7. Interpret the stratification patterns in your graphs in light of seasonal trends. In addition, do you see differences between the two years?
+
+> 
+
+### Multiple lakes, single date 
+
+8. On July 25, 26, and 27 in 2016, all three lakes (Peter, Paul, and Tuesday) were sampled. Wrangle your data frame to include just these three dates.
+
+```{r}
+
+```
+
+9. Plot a profile line graph of temperature by depth, one line per lake. Each lake can be designated by a separate color.
+
+```{r}
+
+```
+
+10. What is the depth range of the epilimnion in each lake? The thermocline? The hypolimnion?
+
+>
+
+## Trends in surface temperatures over time. 
+11. Run the same analyses we ran in class to determine if surface lake temperatures for a given month have increased over time ("Long-term change in temperature" section of day 4 lesson in its entirety), this time for either Peter or Tuesday Lake. 
+
+```{r}
+
+```
+
+12. How do your results compare to those we found in class for Paul Lake? Do similar trends exist for both lakes?
+
+> 
