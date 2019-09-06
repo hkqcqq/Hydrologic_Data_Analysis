@@ -96,16 +96,16 @@ print(Physicalprofiles2016)
 
 How do temperature profiles vary over the course of a season? What are the mechanisms for this pattern?
 
-> 
+> It decreases as the depth rises. And the T of the surface layer of water varies largely with the time (atmosphere temperature), while the T of hyperoliminia is more close.
 
 How do irradiance profiles vary over the course of a season? What are the mechanisms for this pattern?
 
-> 
+> The surface layer of water receives the most irradiance. As it is deeper, the irradiance decreases. Particles and biomass may block the irradiance.
 
 How do dissolved oxygen profiles vary over the course of a season? What are the mechanisms for this pattern?
 
-> 
-
+> It increases at first and becomes the biggest at the middle layer of water and then decreses as it's deeper. Physical and biological.
+Bottom: bacteria disslove the nutrition, resperation
 
 ## Data Analysis
 
@@ -122,8 +122,19 @@ Steps:
 5. Create a ggplot of surface temps by date and facet by month. Add `geom_smooth(se = FALSE, method = lm)` to the plot to display the regression line.
 
 ```{r}
+Pauldata <- mutate(Pauldata,month(sampledate))
+names(Pauldata)[12] <- c("Month")
 
+Pauldata_Summer_surface <- filter(Pauldata, (Month  == "5" | Month  =="6" | Month  =="7" | Month  =="8") 
+                                  & (depth == "0"))
 
+Pauldata_surface_5 <- filter(Pauldata_Summer_surface, Month  == "5" )
+Pauldata_surface_6 <- filter(Pauldata_Summer_surface, Month  == "6" )
+Pauldata_surface_7 <- filter(Pauldata_Summer_surface, Month  == "7" )
+Pauldata_surface_8 <- filter(Pauldata_Summer_surface, Month  == "8" )
+
+Maylinear <- lm(data = Pauldata_surface_5, temperature_C ~ year4) 
+summary(Maylinear)
 
 ```
 
