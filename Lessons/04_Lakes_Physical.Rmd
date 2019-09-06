@@ -96,15 +96,16 @@ print(Physicalprofiles2016)
 
 How do temperature profiles vary over the course of a season? What are the mechanisms for this pattern?
 
-> 
+> It decreases as the depth rises. And the T of the surface layer of water varies largely with the time (atmosphere temperature), while the T of hyperoliminia is more close.
 
 How do irradiance profiles vary over the course of a season? What are the mechanisms for this pattern?
 
-> 
+> The surface layer of water receives the most irradiance. As it is deeper, the irradiance decreases. Particles and biomass may block the irradiance.
 
 How do dissolved oxygen profiles vary over the course of a season? What are the mechanisms for this pattern?
 
-> 
+> It increases at first and becomes the biggest at the middle layer of water and then decreses as it's deeper. Physical and biological.
+Bottom: bacteria disslove the nutrition, resperation
 
 
 ## Data Analysis
@@ -119,17 +120,42 @@ Steps:
 3. Create 4 separate data frames, one for each month
 4. Run a linear regression for each data frame (see instructions above)
 5. For significant trends, calculate how many degrees the lake has warmed over the period of study
-5. Create a ggplot of surface temps by date and facet by month. Add `geom_smooth(se = FALSE, method = lm)` to the plot to display the regression line.
+6. Create a ggplot of surface temps by date and facet by month. Add `geom_smooth(se = FALSE, method = lm)` to the plot to display the regression line.
 
 ```{r}
+Pauldata <- mutate(Pauldata,month(sampledate))
+names(Pauldata)[12] <- c("Month")
+Pauldata_Summer_surface <- filter(Pauldata, (Month  == "5" | Month  =="6" | Month  =="7" | Month  =="8") 
+                                  & (depth == "0"))
+Pauldata_surface_5 <- filter(Pauldata_Summer_surface, Month  == "5" )
+Pauldata_surface_6 <- filter(Pauldata_Summer_surface, Month  == "6" )
+Pauldata_surface_7 <- filter(Pauldata_Summer_surface, Month  == "7" )
+Pauldata_surface_8 <- filter(Pauldata_Summer_surface, Month  == "8" )
 
+Maylinear <- lm(data = Pauldata_surface_5, temperature_C ~ year4) 
+summary(Maylinear)
+Junelinear <- lm(data = Pauldata_surface_6, temperature_C ~ year4) 
+summary(Junelinear)
+Julylinear <- lm(data = Pauldata_surface_7, temperature_C ~ year4) 
+summary(Julylinear)
+# Temperature increases 0.06 degree per year
+# 0.06*31 = 1.86 degree increase over period of study for July
+Auglinear <- lm(data = Pauldata_surface_8, temperature_C ~ year4) 
+summary(Auglinear)
+# Temperature increases 0.04 degree per year
+# 0.04*31 = 1.24 degree increase over period of study for August
 
-
+ggplotTchange <-
+  ggplot(Pauldata_Summer_surface, aes(x = sampledate, y = temperature_C)) + 
+           geom_point() +
+           geom_smooth(se = FALSE, method = lm) +
+           facet_grid(rows = vars(Month))
+print(ggplotTchange)
 ```
 
 Summarize your results below. How would you explain your findings and the importance of these findings to a non-specialist audience while still employing the data and statistical results?
 
->
+> The average temperature of surface water of Paul Lake per month from May to August is rising these years, especially July and August, which has significant trends of temperature rise.
 
 ## Closing Discussion
 How do warming surface waters impact the physical properties of a lake? How might this affect the ecology of the lake?
