@@ -155,7 +155,7 @@ print(ggplotTchange)
 
 Summarize your results below. How would you explain your findings and the importance of these findings to a non-specialist audience while still employing the data and statistical results?
 
-> The average temperature of surface water of Paul Lake per month from May to August is rising these years, especially July and August, which has significant trends of temperature rise.
+> The average temperature of surface water of Paul Lake per month from May to August is rising these years, especially the temperature in July and August, which has significant trends of rise.
 
 ## Closing Discussion
 How do warming surface waters impact the physical properties of a lake? How might this affect the ecology of the lake?
