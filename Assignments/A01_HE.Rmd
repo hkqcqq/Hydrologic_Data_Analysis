@@ -98,24 +98,56 @@ names(EnoGageHeight)[6] <- c("year")
 ```{r}
 EnoTotal <- merge(EnoDischarge, EnoGageHeight, by="Date")
 
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Spectral")
 EnoPlotDis_Gage <-
-  ggplot(EnoTotal, aes(x = Gage.Height, y = Discharge))+
-  geom_line()
+  ggplot(EnoTotal, aes(x = Gage.Height)) +
+  geom_line(aes(y = Discharge)) +
+  geom_point(aes(y = Discharge, color = "2009"), data = subset(EnoTotal, year.x == "2009"), 
+             alpha = 0.5) +
+  geom_point(aes(y = Discharge, color = "2010"), data = subset(EnoTotal, year.x == "2010"), 
+             alpha = 0.5) +
+  geom_point(aes(y = Discharge, color = "2011"), data = subset(EnoTotal, year.x == "2011"), 
+             alpha = 0.5) +
+  geom_point(aes(y = Discharge, color = "2012"), data = subset(EnoTotal, year.x == "2012"), 
+             alpha = 0.5) +
+  geom_point(aes(y = Discharge, color = "2013"), data = subset(EnoTotal, year.x == "2013"), 
+             alpha = 0.5) +
+  geom_point(aes(y = Discharge, color = "2014"), data = subset(EnoTotal, year.x == "2014"), 
+             alpha = 0.5) +
+  geom_point(aes(y = Discharge, color = "2015"), data = subset(EnoTotal, year.x == "2015"), 
+             alpha = 0.5) +
+  geom_point(aes(y = Discharge, color = "2016"), data = subset(EnoTotal, year.x == "2016"), 
+             alpha = 0.5) +
+  geom_point(aes(y = Discharge, color = "2017"), data = subset(EnoTotal, year.x == "2017"), 
+             alpha = 0.5) +
+  geom_point(aes(y = Discharge, color = "2018"), data = subset(EnoTotal, year.x == "2018"), 
+             alpha = 0.5) +
+  geom_point(aes(y = Discharge, color = "2019"), data = subset(EnoTotal, year.x == "2019"), 
+             alpha = 0.5) +
+  scale_x_continuous(name = expression("Gage Height (ft)")) +
+  scale_y_continuous(name = expression("Discharge (ft"^3*"/s)")) +
+  theme(legend.title = element_blank())
 plot(EnoPlotDis_Gage)
 ```
 
 10. Interpret the graph you made. Write 2-3 sentences communicating the main takeaway points. 
 
-> ANSWER: 
+> ANSWER: As can be seen from the ggplot of discharge vs. gage height, as gage height increases, discharge increases, i.e. discharge is almost positively correlated with gage height. Most of the discharge is relative small, concentrating below 5000 ft^3/s. Correspondingly, the gege height is also relatively small, concentrating below 12 ft. In recent years, discharge has the trend of increasing.
 
 11. Create a ggplot violin plot of discharge, divided by year. (Hint: in your aesthetics, specify year as a factor rather than a continuous variable). Make the following edits to follow good data visualization practices: 
 
 * Remove x axis label
 * Add a horizontal line at the 0.5 quantile within each violin (hint: draw_quantiles)
 ```{r}
-
+EnoTotal$year.x <- as.factor(EnoTotal$year.x)
+EnoViolin <- 
+  ggplot(EnoTotal, aes(x = year.x, y = Discharge)) + 
+  geom_violin(aes(fill = year.x), draw_quantiles = 0.5) +
+  scale_y_continuous(name = expression("Discharge (ft"^3*"/s)")) +
+  theme(axis.title.x = element_blank())
+plot(EnoViolin)
 ```
 
 12. Interpret the graph you made. Write 2-3 sentences communicating the main takeaway points. 
 
-> ANSWER: 
+> ANSWER: As can be seen from the ggplot violin plot of discharge, discharge varies greatly in a year.  Most of the discharge is relative small, concentrating below 5000 ft^3/s. The 0.5 quantile of each year is around 500 ft^3/s. The biggest discharge happened in year 2018. In recent years, discharge has the trend of increasing.
