@@ -185,7 +185,6 @@ ggplotTchange <-
            geom_smooth(se = FALSE, method = lm) +
            facet_grid(rows = vars(Month))
 print(ggplotTchange)
-
 ```
 
 12. How do your results compare to those we found in class for Paul Lake? Do similar trends exist for both lakes?
