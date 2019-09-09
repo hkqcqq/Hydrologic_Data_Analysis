@@ -69,7 +69,7 @@ Tempprofiles1984 <-
   scale_color_viridis_c(end = 0.8, option = "magma") +
   labs(x = expression("Temperature "(degree*C)), y = "Depth (m)") +
   theme(legend.position = "right") +
-  labs(color = "Julian Day")
+  labs(color = "Ordinal Day")
 print(Tempprofiles1984)
 
 Tempprofiles2016 <- 
@@ -80,7 +80,7 @@ Tempprofiles2016 <-
   scale_color_viridis_c(end = 0.8, option = "magma") +
   labs(x = expression("Temperature "(degree*C)), y = "Depth (m)") +
   theme(legend.position = "right") +
-  labs(color = "Julian Day")
+  labs(color = "Ordinal Day")
 print(Tempprofiles2016)
 
 Tempprofiles19841 <- 
@@ -99,7 +99,7 @@ Tempprofiles20161 <-
   scale_x_continuous(position = "top") +
   scale_color_viridis_c(end = 0.8, option = "magma") +
   labs(x = expression("Temperature_2016 "(degree*C)), y = "Depth (m)") +
-  labs(color = "Julian Day") +
+  labs(color = "Ordinal Day") +
   theme(axis.text.y = element_blank(), axis.title.y = element_blank())
 
 Physicalprofiles <- 
