@@ -1,5 +1,5 @@
 ---
-title: "2: R and Data Visualization Boot Camp"
+title: "5: Physical Properties of Rivers"
 author: "Hydrologic Data Analysis | Kateri Salk"
 date: "Fall 2019"
 output: pdf_document
