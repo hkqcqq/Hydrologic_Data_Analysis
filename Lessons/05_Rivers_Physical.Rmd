@@ -15,6 +15,12 @@ editor_options:
 
 ## Opening Discussion
 What are the physical properties of streams and rivers? What variables might be of interest?
+discharge vol/time
+velocity distance/time
+bed material->erosion->turbidity
+temperature
+mixing->turbulent->lanmnar flow
+slope
 
 ## Session Set Up
 
@@ -32,6 +38,9 @@ theme_set(theme_classic())
 ## Discharge
 
 One of the most important physical characteristics of a stream or river is **discharge**, the volume of water moving through the stream over a given amount of time. Discharge can be measured directly by measuring the velocity of flow in several spots in a stream and multiplying the flow velocity over the cross-sectional area of the stream. However, this method is effort-intensive. An easier way to approximate discharge is by developing a **rating curve** for a stream at a given sampling point. To develop a rating curve, a series of measurements of discharge and stream stage must be made together to develop a mathematical relationship. Then, subsequent discharge measurements can be calculated from a measurement of stream stage, measured by a gage that takes readings remotely. 
+
+> velocity*cross-sectional area
+generally: station gage
 
 ```{r}
 EnoDischarge.ratingcurve <- readNWISdv(siteNumbers = "02096500",
@@ -78,7 +87,7 @@ What data are available from the sites? Pay particular attention to the paramete
 
 What is the period of record for mean daily discharge at each of these sites?
 
-> Eno River: 
+> Eno River: 1928-10-01~2019-09-10
 
 > Verde River: 
 
@@ -200,15 +209,16 @@ print(CombinedPlot)
 
 How does the magnitude of discharge compare for these rivers?
 
->
+> The discharge of Eno River is the biggest, while discharge of Sauk River is the smallest. 
 
 Which of these rivers have a seasonal cycle of discharge? How might you explain the presence and timing of seasonal cycles based on climatic conditions?
 
->
+> Bitterroot River, Sauk River, Nehalem River
+  Maybe there are wet seasons and dry seasons. Preciptation in different seasons differs.
 
 Hypothetical question: If you wanted to create a ggplot using facets instead of `plot_grid`, how would you go about wrangling your dataset differently? 
 
->
+> rbind
 
 ## Defining "typical" discharge pattern
 Let's take the Bitterroot River, which displays a clear seasonal cycle. Let's define the median discharge on a given day of year and overlay this onto the range experienced. We will take a longer period of record this time.
