@@ -30,6 +30,10 @@ The completed exercise is due on 11 September 2019 at 9:00 am.
 ```{r}
 getwd()
 
+# install.packages("tidyverse")
+# install.packages("lubridate")
+# install.packages("cowplot")
+
 library(tidyverse)
 library(lubridate)
 library(cowplot)
@@ -65,7 +69,7 @@ Tempprofiles1984 <-
   scale_color_viridis_c(end = 0.8, option = "magma") +
   labs(x = expression("Temperature "(degree*C)), y = "Depth (m)") +
   theme(legend.position = "right") +
-  labs(color = "Julian Day")
+  labs(color = "Ordinal Day")
 print(Tempprofiles1984)
 
 Tempprofiles2016 <- 
@@ -76,7 +80,7 @@ Tempprofiles2016 <-
   scale_color_viridis_c(end = 0.8, option = "magma") +
   labs(x = expression("Temperature "(degree*C)), y = "Depth (m)") +
   theme(legend.position = "right") +
-  labs(color = "Julian Day")
+  labs(color = "Ordinal Day")
 print(Tempprofiles2016)
 
 Tempprofiles19841 <- 
@@ -87,7 +91,7 @@ Tempprofiles19841 <-
   scale_color_viridis_c(end = 0.8, option = "magma") +
   labs(x = expression("Temperature_1984 "(degree*C)), y = "Depth (m)") +
   theme(legend.position = "none")
-print(Tempprofiles19841)
+
 Tempprofiles20161 <- 
   ggplot(Peterdata2016, aes(x = temperature_C, y = depth, color = daynum)) +
   geom_point() +
@@ -95,9 +99,9 @@ Tempprofiles20161 <-
   scale_x_continuous(position = "top") +
   scale_color_viridis_c(end = 0.8, option = "magma") +
   labs(x = expression("Temperature_2016 "(degree*C)), y = "Depth (m)") +
-  labs(color = "Julian Day") +
+  labs(color = "Ordinal Day") +
   theme(axis.text.y = element_blank(), axis.title.y = element_blank())
-print(Tempprofiles20161)
+
 Physicalprofiles <- 
   plot_grid(Tempprofiles19841, Tempprofiles20161, 
             ncol = 2, rel_widths = c(1.25, 1.5))
@@ -117,8 +121,10 @@ Diferences between the two years:
 8. On July 25, 26, and 27 in 2016, all three lakes (Peter, Paul, and Tuesday) were sampled. Wrangle your data frame to include just these three dates.
 
 ```{r}
-Threelakesdata <- filter(NTLdata, (lakename == "Peter Lake"| lakename == "Paul Lake"| lakename == "Tuesday Lake") 
-                         & (sampledate == "2016-07-25" | sampledate == "2016-07-26" | sampledate == "2016-07-27"))
+Threelakesdata <- filter(NTLdata, (lakename == "Peter Lake"| lakename == "Paul Lake"| 
+                                     lakename == "Tuesday Lake") 
+                         & (sampledate == "2016-07-25" | sampledate == "2016-07-26" | 
+                              sampledate == "2016-07-27"))
 ```
 
 9. Plot a profile line graph of temperature by depth, one line per lake. Each lake can be designated by a separate color.
@@ -141,10 +147,9 @@ print(Tempprofilesthreelakes)
 
 10. What is the depth range of the epilimnion in each lake? The thermocline? The hypolimnion?
 
->   Lake Name    Epilimnion(m)   Thermocline(m)   Hypolimnion(m)
-    Paul Lake      0.0-2.0          2.0-7.5         Below 7.5
-   Peter Lake      0.0-1.5          1.5-7.5         Below 7.5
-  Tuesday Lake     0.0-1.5          1.5-6.0         Below 6.0
+>Epilimnion(m): Paul Lake(0.0-2.0), Peter Lake(0.0-1.5), Tuesday Lake(0.0-1.5)  
+ Thermocline(m): Paul Lake(2.0-7.5), Peter Lake(1.5-7.5), Tuesday Lake(1.5-6.0)
+ Hypolimnion(m): Paul Lake(Below 7.5), Peter Lake(Below 7.5), Tuesday Lake(Below 6.0)
 
 ## Trends in surface temperatures over time. 
 11. Run the same analyses we ran in class to determine if surface lake temperatures for a given month have increased over time ("Long-term change in temperature" section of day 4 lesson in its entirety), this time for either Peter or Tuesday Lake. 
@@ -153,7 +158,8 @@ print(Tempprofilesthreelakes)
 Peterdata <- filter(NTLdata, lakename == "Peter Lake")
 Peterdata <- mutate(Peterdata,month(sampledate))
 names(Peterdata)[12] <- c("Month")
-Peterdata_Summer_surface <- filter(Peterdata, (Month  == "5" | Month  =="6" | Month  =="7" | Month  =="8") 
+Peterdata_Summer_surface <- filter(Peterdata, (Month  == "5" | Month  =="6" | 
+                                                 Month  =="7" | Month  =="8") 
                                   & (depth == "0"))
 Peterdata_surface_5 <- filter(Peterdata_Summer_surface, Month  == "5" )
 Peterdata_surface_6 <- filter(Peterdata_Summer_surface, Month  == "6" )
