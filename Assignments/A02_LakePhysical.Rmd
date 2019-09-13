@@ -69,7 +69,7 @@ Tempprofiles1984 <-
   scale_color_viridis_c(end = 0.8, option = "magma") +
   labs(x = expression("Temperature "(degree*C)), y = "Depth (m)") +
   theme(legend.position = "right") +
-  labs(color = "Ordinal Day")
+  labs(color = "Ordinal Day") 
 print(Tempprofiles1984)
 
 Tempprofiles2016 <- 
@@ -90,7 +90,10 @@ Tempprofiles19841 <-
   scale_x_continuous(position = "top") +
   scale_color_viridis_c(end = 0.8, option = "magma") +
   labs(x = expression("Temperature_1984 "(degree*C)), y = "Depth (m)") +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  scale_color_viridis_c(limits = c(min(Peterdata$daynum),
+                                 max(Peterdata$daynum))) +
+  coord_cartesian(xlim = c(0, 26), ylim = c(0, 12.5))
 
 Tempprofiles20161 <- 
   ggplot(Peterdata2016, aes(x = temperature_C, y = depth, color = daynum)) +
