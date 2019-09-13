@@ -1,0 +1,82 @@
+---
+title: "Assignment 3: Physical Properties of Rivers"
+author: "Student Name"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## OVERVIEW
+
+This exercise accompanies the lessons in Hydrologic Data Analysis on the physical properties of rivers. 
+
+## Directions
+1. Change "Student Name" on line 3 (above) with your name.
+3. Work through the steps, **creating code and output** that fulfill each instruction.
+4. Be sure to **answer the questions** in this assignment document.
+6. When you have completed the assignment, **Knit** the text and code into a single PDF file.
+8. After Knitting, submit the completed exercise (PDF file) to the dropbox in Sakai. Add your last name into the file name (e.g., "Salk_A03_RiversPhysical.Rmd") prior to submission.
+
+The completed exercise is due on 18 September 2019 at 9:00 am.
+
+## Setup
+
+1. Verify your working directory is set to the R project file, 
+2. Load the tidyverse, dataRetrieval, and cowplot packages
+3. Set your ggplot theme (can be theme_classic or something else)
+4. Import a data frame called "MysterySiteDischarge" from USGS gage site 03431700. Upload all discharge data for the entire period of record. Rename columns 4 and 5 as "Discharge" and "Approval.Code". DO NOT LOOK UP WHERE THIS SITE IS LOCATED. 
+5. Build a ggplot of discharge over the entire period of record. 
+
+```{r}
+
+
+```
+
+## Analyze seasonal patterns in discharge
+
+5. Add a "Year" and "Day.of.Year" column to the data frame.
+6. Create a new data frame called "MysterySiteDischarge.Pattern" that has columns for Day.of.Year, median discharge for a given day of year, 75th percentile discharge for a given day of year, and 25th percentile discharge for a given day of year. Hint: the summarise function includes `quantile`, wherein you must specify `probs` as a value between 0 and 1.
+7. Create a plot of median, 75th quantile, and 25th quantile discharges against day of year. Median should be black, other lines should be gray. 
+```{r}
+
+
+```
+
+8. What seasonal patterns do you see? What does this tell you about precipitation patterns and climate in the watershed?
+
+> 
+
+## Create and analyze recurrence intervals
+
+9. Create two separate data frames for MysterySite.Annual.30yr (first 30 years of record) and MysterySite.Annual.Full (all years of record). Use a pipe to create your new data frame(s) that includes the year, the peak discharge observed in that year, a ranking of peak discharges, the recurrence interval, and the exceedende probability.
+
+10. Create a plot that displays the discharge vs. recurrence interval relationship for the two separate data frames (one set of points includes the values computed from the first 30 years of the record and the other set of points includes the values computed for all years of the record. 
+
+11. Create a model to predict the discharge for a 100-year flood for both sets of recurrence intervals. 
+
+```{r}
+
+
+```
+
+12. How did the recurrence interval plots and predictions of a 100-year flood differ among the two data frames? What does this tell you about the stationarity of discharge in this river?
+
+> 
+
+## Reflection
+13. What are 2-3 conclusions or summary points about river discharge you learned through your analysis?
+
+>
+
+14. What data, visualizations, and/or models supported your conclusions from 13?
+
+> 
+
+15. Did hands-on data analysis impact your learning about discharge relative to a theory-based lesson? If so, how?
+
+>
+
+16.	How did the real-world data compare with your expectations from theory?
+
+>
