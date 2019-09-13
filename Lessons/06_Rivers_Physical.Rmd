@@ -15,7 +15,8 @@ editor_options:
 
 ## Opening Discussion
 How is climate change impacting discharge in streams and rivers? What are the new and ongoing challenges faced by these impacts in watersheds?
-
+>mountainous river
+ extremely preciptation
 ## Session Set Up
 
 ```{r, message = FALSE}
@@ -98,7 +99,7 @@ EnoRecurrencePlot <-
 print(EnoRecurrencePlot)
 
 Eno.RImodel <- lm(data = EnoRecurrence, PeakDischarge ~ log(RecurrenceInterval))
-summary(Eno.RImodel)
+summary(Eno.RImodel) # Discharge = 1332.5 + 1725.8 * log(RecurrenceInterval)
 
 #What is the discharge for a 100-year flood in this system? a 500-year flood?
 Eno.RImodel$coefficients[1] + Eno.RImodel$coefficients[2]*log(100)
@@ -137,7 +138,7 @@ Eno.RImodel$coefficients[1] + Eno.RImodel$coefficients[2]*log(500)
 
 What differences did you see for the recurrence intervals built under different periods of record? How would your prediction of flood events differ if you were to use these models for forecasting purposes? 
 
->
+> When more data was used, the result will be more accurate. In this case, the prediction of flood events when 30 years data was used is much smaller than using full data.
 
 What would you recommend for a watershed manager seeking to build the most accurate recurrence interval model for the Eno River?
 
@@ -164,7 +165,63 @@ SaladoPlot <-
 print(SaladoPlot)
 
 # add more code here: 
+SaladoDischarge <- 
+  SaladoDischarge %>%
+  mutate(Year = year(Date))
 
+SaladoRecurrencefirst30 <- 
+  SaladoDischarge %>%
+  filter(Year < 1990) %>%
+  group_by(Year) %>%
+  summarise(PeakDischarge = max(Discharge)) %>% 
+  mutate(Rank = rank(-PeakDischarge), 
+         RecurrenceInterval = (length(Year) + 1)/Rank, 
+         Probability = 1/RecurrenceInterval)
+
+SaladoRecurrencePlotfirst30 <- 
+  ggplot(SaladoRecurrencefirst30, aes(x = RecurrenceInterval, y = PeakDischarge)) +
+  geom_point() #+
+  #scale_x_log10() 
+print(SaladoRecurrencePlotfirst30)
+
+Salado.RImodelfirst30 <- lm(data = SaladoRecurrencefirst30, PeakDischarge ~ log(RecurrenceInterval))
+summary(Salado.RImodelfirst30)
+
+#What is the discharge for a 100-year flood in this system? a 500-year flood?
+Salado.RImodelfirst30$coefficients[1] + Salado.RImodelfirst30$coefficients[2]*log(100)
+Salado.RImodelfirst30$coefficients[1] + Salado.RImodelfirst30$coefficients[2]*log(500)
+
+
+SaladoRecurrencelatter30 <- 
+  SaladoDischarge %>%
+  filter(Year > 1985) %>%
+  group_by(Year) %>%
+  summarise(PeakDischarge = max(Discharge)) %>% 
+  mutate(Rank = rank(-PeakDischarge), 
+         RecurrenceInterval = (length(Year) + 1)/Rank, 
+         Probability = 1/RecurrenceInterval)
+
+SaladoRecurrencePlotlatter30 <- 
+  ggplot(SaladoRecurrencelatter30, aes(x = RecurrenceInterval, y = PeakDischarge)) +
+  geom_point() #+
+  #scale_x_log10() 
+print(SaladoRecurrencePlotlatter30)
+
+Salado.RImodellatter30 <- lm(data = SaladoRecurrencelatter30, PeakDischarge ~ log(RecurrenceInterval))
+summary(Salado.RImodellatter30)
+
+#What is the discharge for a 100-year flood in this system? a 500-year flood?
+Salado.RImodellatter30$coefficients[1] + Salado.RImodellatter30$coefficients[2]*log(100)
+Salado.RImodellatter30$coefficients[1] + Salado.RImodellatter30$coefficients[2]*log(500)
+
+SaladoRecurrencePlot.Full <- 
+  ggplot(SaladoRecurrencefirst30, aes(x = RecurrenceInterval, y = PeakDischarge)) +
+  geom_point() +
+  geom_point(data = SaladoRecurrencelatter30, color = "#02818a",
+             aes(x = RecurrenceInterval, y = PeakDischarge))
+print(SaladoRecurrencePlot.Full)
+
+Salado.RImodel.Full <- lm(data = SaladoRecurrence.Full, PeakDischarge ~ log(RecurrenceInterval))
 ```
 
 ### Examining the effects of dam construction on recurrence intervals
@@ -188,7 +245,31 @@ GreenPlot <-
 print(GreenPlot)
 
 # add more code here:
+GreenDischarge <- 
+  GreenDischarge %>%
+  mutate(Year = year(Date))
 
+GreenRecurrencefirst <- 
+  GreenDischarge %>%
+  filter(Year < 1961) %>%
+  group_by(Year) %>%
+  summarise(PeakDischarge = max(Discharge)) %>% 
+  mutate(Rank = rank(-PeakDischarge), 
+         RecurrenceInterval = (length(Year) + 1)/Rank, 
+         Probability = 1/RecurrenceInterval)
+
+GreenRecurrencePlotfirst <- 
+  ggplot(GreenRecurrencefirst, aes(x = RecurrenceInterval, y = PeakDischarge)) +
+  geom_point() #+
+  #scale_x_log10() 
+print(GreenRecurrencePlotfirst)
+
+Green.RImodelfirst30 <- lm(data = SaladoRecurrencefirst30, PeakDischarge ~ log(RecurrenceInterval))
+summary(Salado.RImodelfirst30)
+
+#What is the discharge for a 100-year flood in this system? a 500-year flood?
+Salado.RImodelfirst30$coefficients[1] + Salado.RImodelfirst30$coefficients[2]*log(100)
+Salado.RImodelfirst30$coefficients[1] + Salado.RImodelfirst30$coefficients[2]*log(500)
 ```
 ## Closing Discussion
 This week we focused on discharge as a physical property of a stream or river. How might you use your knowledge of discharge to inform other physical processes occurring in rivers?
