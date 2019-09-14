@@ -264,12 +264,35 @@ GreenRecurrencePlotfirst <-
   #scale_x_log10() 
 print(GreenRecurrencePlotfirst)
 
-Green.RImodelfirst30 <- lm(data = SaladoRecurrencefirst30, PeakDischarge ~ log(RecurrenceInterval))
-summary(Salado.RImodelfirst30)
+Green.RImodelfirst <- lm(data = GreenRecurrencefirst, PeakDischarge ~ log(RecurrenceInterval))
+summary(Green.RImodelfirst)
 
 #What is the discharge for a 100-year flood in this system? a 500-year flood?
-Salado.RImodelfirst30$coefficients[1] + Salado.RImodelfirst30$coefficients[2]*log(100)
-Salado.RImodelfirst30$coefficients[1] + Salado.RImodelfirst30$coefficients[2]*log(500)
+Green.RImodelfirst$coefficients[1] + Green.RImodelfirst$coefficients[2]*log(100)
+Green.RImodelfirst$coefficients[1] + Green.RImodelfirst$coefficients[2]*log(500)
+
+GreenRecurrencelatter <- 
+  GreenDischarge %>%
+  filter(Year > 1960) %>%
+  group_by(Year) %>%
+  summarise(PeakDischarge = max(Discharge)) %>% 
+  mutate(Rank = rank(-PeakDischarge), 
+         RecurrenceInterval = (length(Year) + 1)/Rank, 
+         Probability = 1/RecurrenceInterval)
+
+GreenRecurrencePlot.Full <- 
+  ggplot(GreenRecurrencefirst, aes(x = RecurrenceInterval, y = PeakDischarge)) +
+  geom_point() +
+  geom_point(data = GreenRecurrencelatter, color = "#02818a",
+             aes(x = RecurrenceInterval, y = PeakDischarge))
+print(GreenRecurrencePlot.Full)
+
+Green.RImodellatter <- lm(data = GreenRecurrencelatter, PeakDischarge ~ log(RecurrenceInterval))
+summary(Green.RImodellatter)
+
+#What is the discharge for a 100-year flood in this system? a 500-year flood?
+Green.RImodellatter$coefficients[1] + Green.RImodellatter$coefficients[2]*log(100)
+Green.RImodellatter$coefficients[1] + Green.RImodellatter$coefficients[2]*log(500)
 ```
 ## Closing Discussion
 This week we focused on discharge as a physical property of a stream or river. How might you use your knowledge of discharge to inform other physical processes occurring in rivers?

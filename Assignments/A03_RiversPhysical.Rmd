@@ -1,6 +1,6 @@
 ---
 title: "Assignment 3: Physical Properties of Rivers"
-author: "Student Name"
+author: "Keqi He"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -29,8 +29,32 @@ The completed exercise is due on 18 September 2019 at 9:00 am.
 5. Build a ggplot of discharge over the entire period of record. 
 
 ```{r}
+getwd()
 
+# install.packages("tidyverse")
+# install.packages("dataRetrieval")
+# install.packages("cowplot")
 
+library(tidyverse)
+library(dataRetrieval)
+library(cowplot)
+
+theme_set(theme_classic())
+
+MysterySiteDischarge <- readNWISdv(siteNumbers = "03431700",
+                     parameterCd = "00060", # discharge (ft3/s)
+                     startDate = "",
+                     endDate = "")
+attr(MysterySiteDischarge, "variableInfo")
+attr(MysterySiteDischarge, "siteInfo")
+
+names(MysterySiteDischarge)[4:5] <- c("Discharge", "Approval.Code")
+
+MysterySitePlot <- 
+  ggplot(MysterySiteDischarge, aes(x = Date, y = Discharge)) +
+         geom_line() +
+         labs(x = "Day of Year", y = expression("Discharge (ft"^3*"/s)")) 
+print(MysterySitePlot)
 ```
 
 ## Analyze seasonal patterns in discharge
@@ -39,13 +63,30 @@ The completed exercise is due on 18 September 2019 at 9:00 am.
 6. Create a new data frame called "MysterySiteDischarge.Pattern" that has columns for Day.of.Year, median discharge for a given day of year, 75th percentile discharge for a given day of year, and 25th percentile discharge for a given day of year. Hint: the summarise function includes `quantile`, wherein you must specify `probs` as a value between 0 and 1.
 7. Create a plot of median, 75th quantile, and 25th quantile discharges against day of year. Median should be black, other lines should be gray. 
 ```{r}
+MysterySiteDischarge <- 
+  MysterySiteDischarge %>%
+  mutate(Year = year(Date),
+         Day.of.Year = yday(Date))
 
+MysterySiteDischarge.Pattern <- 
+    MysterySiteDischarge %>%
+    group_by(Day.of.Year) %>%
+    summarise(MedianDischarge = median(Discharge),
+      Discharge_75 = quantile(Discharge, .75),
+      Discharge_25 = quantile(Discharge, .25))
 
+MysteryPatternPlot <- 
+  ggplot(MysterySiteDischarge.Pattern, aes(x = Day.of.Year)) +
+  geom_line(aes(y = MedianDischarge)) +
+  geom_line(aes(y = Discharge_75), color = "gray") +
+  geom_line(aes(y = Discharge_25), color = "gray") +  
+  labs(x = "Day of Year", y = expression("Discharge (ft"^3*"/s)")) 
+print(MysteryPatternPlot)
 ```
 
 8. What seasonal patterns do you see? What does this tell you about precipitation patterns and climate in the watershed?
 
-> 
+> Discharge is much larger in winter and spring (November to April), while it is small in summer and fall. This watershed has different periods of precipitation and heat. In summer and fall, the temperature is high but the precipitation is small which will cause the watershed hot and dry. While in winter and spring, the temperature is low but the precipitation is large which will cause the watershed cold and wet.
 
 ## Create and analyze recurrence intervals
 
@@ -56,27 +97,57 @@ The completed exercise is due on 18 September 2019 at 9:00 am.
 11. Create a model to predict the discharge for a 100-year flood for both sets of recurrence intervals. 
 
 ```{r}
+MysterySite.Annual.30yr <-
+  MysterySiteDischarge %>%
+  filter(Year < 1996) %>%
+  group_by(Year) %>%
+  summarise(PeakDischarge = max(Discharge)) %>% 
+  mutate(Rank = rank(-PeakDischarge), 
+         RecurrenceInterval = (length(Year) + 1)/Rank, 
+         Probability = 1/RecurrenceInterval)
 
+MysterySite.Annual.Full <-
+  MysterySiteDischarge %>%
+  group_by(Year) %>%
+  summarise(PeakDischarge = max(Discharge)) %>% 
+  mutate(Rank = rank(-PeakDischarge), 
+         RecurrenceInterval = (length(Year) + 1)/Rank, 
+         Probability = 1/RecurrenceInterval)
 
+MysteryRecurrencePlot.Full <- 
+  ggplot(MysterySite.Annual.30yr, aes(x = RecurrenceInterval, y = PeakDischarge)) +
+  geom_point() +
+  geom_point(data = MysterySite.Annual.Full, color = "#02818a",
+             aes(x = RecurrenceInterval, y = PeakDischarge))
+print(MysteryRecurrencePlot.Full)
+
+Mystery.RImodel.30yr <- lm(data = MysterySite.Annual.30yr, PeakDischarge ~ log(RecurrenceInterval))
+summary(Mystery.RImodel.30yr)
+Mystery.RImodel.Full <- lm(data = MysterySite.Annual.Full, PeakDischarge ~ log(RecurrenceInterval))
+summary(Mystery.RImodel.Full)
+
+Mystery.RImodel.30yr$coefficients[1] + Mystery.RImodel.30yr$coefficients[2]*log(100)
+
+Mystery.RImodel.Full$coefficients[1] + Mystery.RImodel.Full$coefficients[2]*log(100)
 ```
 
 12. How did the recurrence interval plots and predictions of a 100-year flood differ among the two data frames? What does this tell you about the stationarity of discharge in this river?
 
-> 
+> For some specific peak discharge, the recurrence interval computed for all years of the record is smaller than that computed for the first 30 years of the record. So the prediction of a 100-year flood using the recurrence interval computed for all years of the record is smaller than the prediction of a 100-year flood using the recurrence interval computed for 30 years of the record. This means that compared with the first 30 years peak discharge, peak discharge happened these years is much smaller. Discharge in this river is not completely stationary.
 
 ## Reflection
 13. What are 2-3 conclusions or summary points about river discharge you learned through your analysis?
 
->
+> Some rivers have seasonal cycle of discharge while some rivers do not have. Whether a river has seasonal cycle is based on its geographical environment and climatic conditions. We can create a model considering the relationship between recurrence interval and peak discharge to predict the peak discharge of a flood with a given exceedence probability.
 
 14. What data, visualizations, and/or models supported your conclusions from 13?
 
-> 
+> Data we used includes discharge, date. Visualizations includes ggplot. And we created linear function between peak discharge and log(recurrence interval) to predicit the peak discharge of a flood with a given exceedence probability.
 
 15. Did hands-on data analysis impact your learning about discharge relative to a theory-based lesson? If so, how?
 
->
+> Yes. Hands-on data analysis can help me learn theory about discharge better. It is more vivid and memorable. Hands-on data analysis is like a procedure that we explore some laws of discharge instead of only receiving knowledge from teacher without any thinking. 
 
 16.	How did the real-world data compare with your expectations from theory?
 
->
+> Real-world data is complicated and imperfect because there are lots of factors can affect the value of real-world data. However, in theory, there are some assumputions that can simplify the problems, like assuming that discharge is stationary when we use discharge records to predict the peak discharge of a flood with a given exceedence probability.
