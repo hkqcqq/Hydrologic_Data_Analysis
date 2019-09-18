@@ -15,7 +15,8 @@ editor_options:
 
 ## Opening Discussion
 What is water quality? What are some of the things it encompasses? 
-
+> composation
+ quality
 ## Session Set Up
 
 ```{r, message = FALSE}
@@ -38,7 +39,8 @@ theme_set(theme_classic())
 
 Why are these important measures of water quality?
 
->
+> support species
+  nutrition
 
 What types of disturbances can impact these parameters?
 
@@ -66,7 +68,7 @@ dat <- dat.raw %>%
   spread(key = Parameter, value = Value) %>%
   rename(SpC = '00095', pH = '00400') %>%
   mutate(Site = case_when(Site == "03201300" ~ "Kanawha River",
-                          Site == "03206790" ~ "Twelvepole Creek"))
+                          Site == "03206790" ~ "Twelvepole Creek")) #case_when is like if_or function
 
 dat.early <- dat %>%
   filter(Date < "1977-01-01")
@@ -105,16 +107,17 @@ print(SpC.plot)
 
 What differences do you see?
 
->
+> The PH of Kanawha River is much higher than Twelvepole Creek.
+
 
 Why might mining be causing the changes you see?
 
->
+> makes the PH of river rise and specific conductance rise
 
 What is the data frequency of these water quality samples? Why don't we have daily values? How does this inform your interpretation of the data?
 
->
-  
+> three times a month
+
 ## What can legislative protections do for water quality?
 
 In 1977 the Surface Mining Control and Reclamation Act (SMCRA) was passed. Take a look at how water quality changed after 1977.
@@ -150,7 +153,8 @@ print(SpC.plot)
 
 Discuss with your group about the differences you see.
 
->
+> PH and specific conductance of K River becomes more consistent, but PH of T Creek decreases greatly, and Specific Conductance also decreases
+  variablity and level
 
 ## Were remediation efforts successful?
 
@@ -208,11 +212,11 @@ t.test(x, y)
 
 How would you communicate these results to a manager? 
 
->
+> There is big difference between the pH and specific conductance before regulation and after.
 
 What can you say with data visualization that you can't say with just the statistical tests?
 
->
+> The regulation is statistically significant. 
 
 
 ## How have individual ions changed over the this timeperiod?
@@ -227,6 +231,16 @@ Manganese.dat <- Manganese.raw %>%
  select(Date = sample_dt, Manganese_ugL = result_va)
   
  
+Manganese.plot.point <- ggplot(Manganese.dat, aes(x = Date, y = Manganese_ugL)) +
+  geom_point() +
+  geom_smooth() +
+  geom_vline(xintercept = 1977, color = "grey", alpha = 0.8, lwd = 2, lty = 2) + 
+  geom_hline(yintercept = 50, color = "red", alpha = 0.8, lwd = 2, lty = 2) + 
+  labs(y = expression("Manganese ("*mu*g*l^-1*")")) +
+  ggtitle("Manganese Concentrations in the Kanawha River")
+
+print(Manganese.plot.point)
+
 Manganese.plot <- ggplot(Manganese.dat, aes(x = Date, y = Manganese_ugL)) +
   geom_line() +
   geom_vline(xintercept = 1977, color = "grey", alpha = 0.8, lwd = 2, lty = 2) + 
@@ -238,11 +252,11 @@ print(Manganese.plot)
 
 Try plotting the manganese data with points instead of lines. Which do you prefer? Why?
 
->
+> Plotting with line.
 
 EPA drinking water standards for Manganese are 0.05 *_mg/L_*. How does the Kanawha stack up?
 
->
+> Manganeses data of water in many days are above 0.05 mg/L. 
 
 Take some time to look at other ions as well. Some suggestions are sulfate (```00945```), nitrate (```71851```), and iron (```71885```), or use the ```whatNWISdata()``` function to find others! EPA drinking water regulations can be found here: https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations. Pay close attention to units! Information about parameter codes can be found in the dataframe ```parameterCdFile```.
 
@@ -256,7 +270,7 @@ Take some time to look at other ions as well. Some suggestions are sulfate (```0
 
 Based on the data you've looked at today, what are some of the water quality impacts of mining?  What other disturbances might cause similar changes?
 
->
+> Fertilization
 
 # References
 
