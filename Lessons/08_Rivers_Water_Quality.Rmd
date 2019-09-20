@@ -1,0 +1,291 @@
+---
+title: "8: Water Quality in Rivers"
+author: "Hydrologic Data Analysis | Cathy Chamberlin"
+date: "Fall 2019"
+output: html_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## Lesson Objectives
+1. Analyze biological aspects of water quality.
+2. Compare water quality data to hydrologic data.
+3. Communicate findings with peers through oral, visual, and written modes
+
+## Opening Discussion
+What are indicator species? Why are they helpful in thinking about water quality?
+
+
+## Session Set Up
+
+```{r, message = FALSE}
+getwd()
+
+packages <- c("tidyverse", 
+              "dataRetrieval", 
+              "cowplot", 
+              "xts",
+              "dygraphs", 
+              "lubridate")
+invisible(lapply(packages, library, character.only = TRUE)) 
+
+
+theme_set(theme_classic(base_size = 12))
+```
+
+## Microbiological indicators
+
+Bacteria is present in almost every stream on earth. Most bacteria are harmless, but some are extremely dangerous to human health.Typical sources of bacterial contamination include waste water treatment plants, animal manure lagoons, and septic systems. There are multiple ways that bacteria can be measured for water quality.
+
+1) **Total cell counts**. One way to measure the bacteria in water is to count the number of cells under a microscope in a given volumn of water (such as 1 mL). The units for this metric are cells ml^-1^.
+2) **Total coliforms**. Coliform bacteria are for the most part harmless microorganisms that live in animal intestines. Total coliforms are often used as a metric of how much raw or insufficiently treated sewage is making its way into a water body. The way these are measured are by taking a known volume of water, cultivating it in the lab, and counting the number of colonies that grow. Units for this metric are colony forming units (cfu) per 100 ml.
+3) **Fecal coliforms**. Fecal coliforms are coliforms that are specifically associated with warm-blooded animals, and can be grown at higher temperatures than other coliforms. Fecal coliforms are a more precise way of estimating sewage inputs, though they are only an indicator species and not necessarily harmful. The most well known species in this group is Escherichia coli (E. coli). Units are cfu per 100 ml. 
+4) **Fecal streptocci**. Fecal streptocci are a different type of bacteria that are also associated with human and animal digestive tracts. Streptocci are more widespread than coliforms. Units are cfu per 100 ml.
+
+Why might it be helpful to have multiple ways to measure bacteria?
+
+>
+
+Where and when do you think the biggest risks from harmful bacteria are?
+
+>
+
+Measuring microbiogial indicators is more expensive and time consuming than some other water quality metrics. Where and when would you measure these?
+
+>
+
+## How have improvements in sewage treatment affected water quality?
+
+We will import data from the Merrimack River near Lowell, Massachusetts. The Merrimack valley has a long history of industrial use, and has many mid-sized cities along the river corridor. Most of these cities have old infrastructure, and their wastewater treatment plants (WWTPs) are built next to the river and discharge directly into the water. Since the passage of the Clean Water Act, plants have either been retrofitted, or new facilities have been built to try to meet the criteria for the *point source discharges*. 
+
+We will import a number of water quality parameters. Remember to reference ```parameterCdFile``` for metadata about the parameters.
+
+```{r pull_data}
+parameters <- parameterCdFile
+
+dat.raw <- readNWISqw(siteNumbers = "01096550", #Merrimack River upstream of Lowell 
+                     parameterCd = c("95200",  #Total cell count
+                                     "31501",  #Total coliforms
+                                     "31625",  #Fecal coliforms (0.7 um filter)
+                                     "31616",  #Fecal coliforms (0.45 um filter)
+                                     "31673",  #Fecal streptocci KF streptocaccus
+                                     "31679"), #Fecal streptocci m-Enterococcus
+                     startDate = "",
+                     endDate = "")
+
+str(dat.raw, give.attr = FALSE)
+
+microb.dat <- dat.raw %>%
+  select(Date = sample_dt, 
+         Parameter = parm_cd, 
+         Value = result_va) %>%
+  group_by(Date, Parameter) %>%
+  summarize(Value = mean(Value)) %>%
+  spread(key = Parameter, value = Value) %>%
+  rename(Total.coli = '31501',
+         F.coli.45 = '31616', 
+         F.coli.7 = '31625',
+         F.strep.strep = '31673',
+         F.strep.ente = '31679',
+         Total.cell = '95200')
+
+begin.date <- min(microb.dat$Date)
+end.date <- max(microb.dat$Date)
+
+Total.coli.plot <- ggplot(microb.dat, aes(x = Date)) +
+  geom_line(aes(y = Total.coli)) +
+  lims(x = c(begin.date, end.date)) +
+  labs(x = "", y = "Total coliforms (cfu / 100 ml)") +
+  theme(legend.position = "top")
+
+print(Total.coli.plot)
+
+
+F.coli.45.plot <- ggplot(microb.dat, aes(x = Date)) +
+  geom_line(aes(y = F.coli.45)) +
+  lims(x = c(begin.date, end.date)) +
+  labs(x = "", 
+       y = expression("Fecal coliforms filtered to 0.45 " * mu *m *  " (cfu / 100 ml)")) 
+
+print(F.coli.45.plot)
+
+F.coli.7.plot <- ggplot(microb.dat, aes(x = Date)) +
+  geom_line(aes(y = F.coli.7)) +
+  lims(x = c(begin.date, end.date)) +
+  labs(x = "", 
+       y = expression("Fecal coliforms filtered to 0.7 " * mu *m *  " (cfu / 100 ml)")) 
+
+print(F.coli.7.plot)
+
+F.strep.strep.plot <- ggplot(microb.dat, aes(x = Date)) +
+  geom_line(aes(y = F.strep.strep)) +
+  lims(x = c(begin.date, end.date)) +
+  labs(x = "", 
+       y = "Fecal streptocci, KF streptococcus (cfu / 100 ml)") 
+
+print(F.strep.strep.plot)
+
+F.strep.ente.plot <- ggplot(microb.dat, aes(x = Date)) +
+  geom_line(aes(y = F.strep.ente)) +
+  lims(x = c(begin.date, end.date)) +
+  labs(x = "", 
+       y = "Fecal streptocci, m-Enterococcus (cfu / 100 ml)") 
+
+print(F.strep.ente.plot)
+
+Total.cell.plot <- ggplot(microb.dat, aes(x = Date)) +
+  geom_line(aes(y = Total.cell), show.legend = FALSE) +
+  lims(x = c(begin.date, end.date)) +
+  labs(x = "", y = expression("Total cell count (# ml"^-1*")")) 
+
+print(Total.cell.plot)
+
+Microbes.plot <- plot_grid(Total.coli.plot +
+                             labs(title = "Total Coliform", y = ""),
+                           F.coli.45.plot + 
+                             labs(title = "Fecal Coliform (.45)", y = "") ,
+                           F.coli.7.plot + 
+                             labs(title = "Fecal Coliform (.7)", y = "") ,
+                           F.strep.strep.plot + 
+                             labs(title = "Fecal streptocci (KF streptococcus)",
+                                  y = ""),
+                           F.strep.ente.plot +
+                             labs(title = "Fecal streptocci (m-Enterococcus)",
+                                  y = ""), 
+                           Total.cell.plot + 
+                             labs(title = "Total cell count", y = ""),
+                           ncol = 1)
+
+print(Microbes.plot)
+```
+
+How would you use all of this data to talk about changes in microbial water quality from 1970 to 2000? What are the challenges?
+
+>
+
+Do you think water quality has improved between 1970 and 2000? Why or why not?
+
+>
+
+The city of Lawrence, MA is downstream of Lowell and gets its drinking water from the Merrimack River. Use the federal drinking water standard for Total Coliforms (https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations#Microorganisms) to comment on whether or not this water necessarily needs to be treated for bacteria.
+
+>
+
+## Seasonal Trends in Water Quality
+
+```{r seasons_analysis}
+monthly.obs <- microb.dat %>%
+  mutate(month = month(Date)) %>%
+  group_by(month) %>%
+  select(-Date) %>%
+  summarize_all(funs(sum(!is.na(.))))
+
+coli.monthly.summaries <- microb.dat %>%
+  mutate(month = month(Date)) %>%
+  group_by(month) %>%
+  select(month, Total.coli) %>%
+  summarize_all(funs(Median = median(., na.rm = T),
+                 quant25 = quantile(., .25, na.rm = T),
+                 quant75 = quantile(., .75, na.rm = T)))
+
+coli.seasons <- ggplot(coli.monthly.summaries, aes(x = month)) +
+  geom_ribbon(aes(ymin = quant25, ymax = quant75), alpha = 0.3) +
+  geom_line(aes(y = Median)) +
+  scale_x_continuous(name = "Month",
+                     breaks = c(1,2,3,4,5,6,7,8,9,10,11,12)) +
+    labs(y = "Total coliforms (cfu / 100 ml)") 
+
+print(coli.seasons)
+```
+
+When are total coliform concentrations highest? Why might this be?
+
+>
+
+Does this pattern also exist for the other microbial indicators?
+
+>
+
+## Combined Sewer Overflows (CSOs)
+
+Many older WWTPs combine the sanitary sewer system of a city and the storm water drainage sewers (e.g. street drains) together before treatment. Treatment occurs in tanks dug in the facilities, and treatment takes usually about a day. When there is a big rainfall event, the amount of water coming through the storm drains can overwhelm the holding capacity in the tanks, and untreated sewage can get discharged into receiving waterbodies. We will next look to see if any of the high bacterial measurements correspond to storm events.
+
+The USGS site that we got the water quality data from does not have discharge data. Other nearby sites with discharge data include a site (```01100000```) 4 miles downstream on the Merrimack River, or a site (```01099500```) 4 miles away on the Concord River. The Merrimack River at this location drains ~4,000 square miles, and the Concord River drains ~400 square miles. 
+
+Which site's discharge data would better indicate when the city of Lowell has exprienced a big rain event?
+
+>
+
+What would a CSO event look like in the data?
+
+>
+
+```{r pull_hydrology}
+
+discharge.raw <- readNWISdv(site = "01099500", parameterCd = c("00060"), startDate = begin.date, endDate = end.date)
+str(discharge.raw, give.attr = FALSE)
+
+discharge.dat <- discharge.raw %>%
+  select(Date = Date, Discharge_cfs = X_00060_00003)
+  
+ggplot(discharge.dat, aes(x = Date, y = Discharge_cfs)) +
+  geom_line() +
+  labs(y = "Discharge (cfs)", x = "Date")
+```
+
+We will use an interactive plotting function, dygraphs to look at the discharge data and microbial data overlain on each other. Let's look first at Total Coliform.
+
+```{r make_dygraph)}
+Total_Coliform <- with(microb.dat, xts(x = Total.coli, order.by = Date))
+Discharge <- with(discharge.dat, xts(x = Discharge_cfs, order.by = Date))
+
+DyDat <- cbind(Total_Coliform, Discharge)
+
+dygraph(DyDat) %>% 
+  dySeries("Total_Coliform", axis = "y2") %>% 
+  dyAxis(name = "y", label = "Discharge (cfs)") %>%
+  dyAxis(name = "y2", label = "Total Coliform (cfu per 100 ml)", valueRange = c(0, 600000)) %>%
+  dyRangeSelector()
+```
+
+Look through the data series and see if you can find some times when a CSO likely occured. Create a ggplot of the 3-4 weeks surrounding the event. (Hint: use the skeleton code available below )
+
+```{r CSO_event, eval=FALSE}
+
+begin.date <- 
+end.date <- 
+  
+discharge.plot <- ggplot(data =  %>% 
+                   filter(), 
+                 aes(x = , y = )) +
+            geom_line() +
+            scale_x_date(limits =  , name  = )
+  
+microb.plot <- ggplot(data =  %>% 
+                   filter(), 
+                 aes(x = )) +
+            geom_point(aes(y = ))+
+            scale_x_date(limits =  , name = )
+  
+  
+plot_grid( , , ncol = 1)
+
+```
+
+Show your plot to your group and discuss why you think it might represent a CSO.
+
+>
+
+## Closing Discussion
+
+We have looked at 2 different measures of water quality this week. What are some of the other important parameters we could measure for water quality? Where would we be most concerned about them?
+
+>
+
+# References
+
+Merrimack River - A Comprehensive Watershed Assessment Report (Massachusetts Executive Office of Environmental Affairs): https://www.mass.gov/files/2017-07/Merrimack%20River%20Watershed%20Assessment%20Report.pdf
+
+National Primary Drinking Water Regulations (EPA): https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations
+
