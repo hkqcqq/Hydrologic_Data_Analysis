@@ -15,7 +15,7 @@ editor_options:
 
 ## Opening Discussion
 What are indicator species? Why are they helpful in thinking about water quality?
-
+the quality of water body
 
 ## Session Set Up
 
@@ -45,7 +45,7 @@ Bacteria is present in almost every stream on earth. Most bacteria are harmless,
 
 Why might it be helpful to have multiple ways to measure bacteria?
 
->
+> cross validation
 
 Where and when do you think the biggest risks from harmful bacteria are?
 
@@ -67,7 +67,7 @@ parameters <- parameterCdFile
 dat.raw <- readNWISqw(siteNumbers = "01096550", #Merrimack River upstream of Lowell 
                      parameterCd = c("95200",  #Total cell count
                                      "31501",  #Total coliforms
-                                     "31625",  #Fecal coliforms (0.7 um filter)
+                                     "31625",  #Fecal coliforms (0.7 um filter) have more Fecal coliforms
                                      "31616",  #Fecal coliforms (0.45 um filter)
                                      "31673",  #Fecal streptocci KF streptocaccus
                                      "31679"), #Fecal streptocci m-Enterococcus
@@ -162,11 +162,11 @@ print(Microbes.plot)
 
 How would you use all of this data to talk about changes in microbial water quality from 1970 to 2000? What are the challenges?
 
->
+> different period, different unit
 
 Do you think water quality has improved between 1970 and 2000? Why or why not?
 
->
+> better
 
 The city of Lawrence, MA is downstream of Lowell and gets its drinking water from the Merrimack River. Use the federal drinking water standard for Total Coliforms (https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations#Microorganisms) to comment on whether or not this water necessarily needs to be treated for bacteria.
 
@@ -197,6 +197,25 @@ coli.seasons <- ggplot(coli.monthly.summaries, aes(x = month)) +
     labs(y = "Total coliforms (cfu / 100 ml)") 
 
 print(coli.seasons)
+
+
+
+Fecal.coli.45.monthly.summaries <- microb.dat %>%
+  mutate(month = month(Date)) %>%
+  group_by(month) %>%
+  select(month, F.coli.45) %>%
+  summarize_all(funs(F.Median.45 = median(., na.rm = T),
+                 F.quant25.45 = quantile(., .25, na.rm = T),
+                 F.quant75.45 = quantile(., .75, na.rm = T)))
+
+Fecal.coli.45.seasons <- ggplot(Fecal.coli.45.monthly.summaries, aes(x = month)) +
+  geom_ribbon(aes(ymin = F.quant25.45, ymax = F.quant75.45), alpha = 0.3) +
+  geom_line(aes(y = F.Median.45)) +
+  scale_x_continuous(name = "Month",
+                     breaks = c(1,2,3,4,5,6,7,8,9,10,11,12)) +
+    labs(y = "Fecal coliforms(.45) (cfu / 100 ml)") 
+
+print(Fecal.coli.45.seasons)
 ```
 
 When are total coliform concentrations highest? Why might this be?
@@ -215,7 +234,7 @@ The USGS site that we got the water quality data from does not have discharge da
 
 Which site's discharge data would better indicate when the city of Lowell has exprienced a big rain event?
 
->
+> 01099500
 
 What would a CSO event look like in the data?
 
@@ -242,7 +261,7 @@ Discharge <- with(discharge.dat, xts(x = Discharge_cfs, order.by = Date))
 
 DyDat <- cbind(Total_Coliform, Discharge)
 
-dygraph(DyDat) %>% 
+dygraph(DyDat) %>% #only time series data
   dySeries("Total_Coliform", axis = "y2") %>% 
   dyAxis(name = "y", label = "Discharge (cfs)") %>%
   dyAxis(name = "y2", label = "Total Coliform (cfu per 100 ml)", valueRange = c(0, 600000)) %>%
