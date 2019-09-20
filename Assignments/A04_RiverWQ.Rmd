@@ -1,6 +1,6 @@
 ---
 title: "Assignment 4: Water Quality in Rivers"
-author: "Student Name"
+author: "Keqi He"
 output: html_document
 geometry: margin=2.54cm
 editor_options: 
@@ -27,7 +27,22 @@ The completed exercise is due on 25 September 2019 at 9:00 am.
 3. Set your ggplot theme (can be theme_classic or something else)
 
 ```{r setup}
+getwd()
 
+#install.packages("tidyverse")
+#install.packages("dataRetrieval")
+#install.packages("cowplot")
+#install.packages("xts")
+#install.packages("dygraphs")
+
+packages <- c("tidyverse", 
+              "dataRetrieval", 
+              "cowplot", 
+              "xts",
+              "dygraphs")
+invisible(lapply(packages, library, character.only = TRUE))
+
+theme_set(theme_classic())
 ```
 
 ## Hypoxia
@@ -38,13 +53,28 @@ This assignment will look at another measure of water quality - oxygen concentra
 4. Import the oxygen water quality data from New Hope Creek at Blands (using `readNWISqw()`, site code `02097314`, parameter code `00300`). Make a data frame called `O2.dat` that includes only the Date and O~2~ concentration values. Give your data frame understandable column names.
 
 ```{r read_data}
-
+oxygendata.raw <- readNWISqw(siteNumbers = c("02097314"), #New Hope Creek at Blands
+                     parameterCd = c("00300"), # oxygen
+                     startDate = "",
+                     endDate = "")
+O2.dat <- oxygendata.raw %>%
+         select(Date = sample_dt, 
+         Value = result_va) %>%
+rename(O2.concentration = 'Value')
 ```
 
 5. Create a ggplot of oxygen concentrations over time. Include a horizonal line at 2 mg/l to show the hypoxia cutoff. 
 
 ```{r}
-
+begin.date <- min(O2.dat$Date)
+end.date <- max(O2.dat$Date)
+O2.plot <- ggplot(O2.dat, aes(x = Date)) +
+  geom_line(aes(y = O2.concentration)) +
+  lims(x = c(begin.date, end.date)) +
+  labs(x = "Date", y = "Oxygen concentrations (mg/l)") +
+  geom_hline(yintercept = 2, color = "grey", alpha = 0.8, lwd = 2, lty = 2) + 
+  theme(legend.position = "top")
+print(O2.plot)
 ```
 
 6. What do you notice about the frequency of hypoxia overtime?
