@@ -235,11 +235,16 @@ print(stateTSIjitter)
 ```
 What insights do we gain from the different visualizations?
 
-> Violin: 
+> Violin: distribution, not show the number of data
 
-> Bar: 
+> Bar: we can know the number of data 
 
 > Jitter:
 
 ## Closing Discussion
 What factors might you expect to influence TSI scores in a given area? What are some variables in the LAGOSNE database that could help you test your hypothesis?
+
+```{r}
+write.csv(LAGOStrophic, "./Data/LAGOStrophic.csv", row.names = FALSE)
+```
+

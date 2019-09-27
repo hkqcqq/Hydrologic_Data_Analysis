@@ -46,21 +46,29 @@ names(LAGOSdata)
 
 In your group, look through the LAGOS-NE database and decide on 5 variables available in the database that may predict N and P concentrations in lakes. Remembering that hypotheses differ from predictions in that they propose a mechanism, make hypotheses about your choices in predictor variables and how they might affect N and P concentrations.
 
-> Variable 1: 
+> Variable 1: state (state)
 
-> Variable 2: 
+> Variable 2: depth (lake_limno)
 
-> Variable 3: 
+> Variable 3: chlorophlla a (epi_nutr)
 
-> Variable 4
+> Variable 4: doc (epi_nutr)
 
-> Variable 5: 
+> Variable 5: secchi disk transpancy (epi_nutr)
 
 Wrangle LAGOSdata so that you have a new data frame that includes TN, TP, your five variables, and any other columns that would be useful for you (e.g., lake id numbers). Helpful functions may include `join`, `select`, `filter`, and `mutate`. Consider whether you want to use `drop_na` to retain complete cases of individual variables or entire rows.
 
 ```{r}
 # Wrangle data here.
+LAGOSlocus <- LAGOSdata$locus
+LAGOSstate <- LAGOSdata$state
+LAGOSnutrient <- LAGOSdata$epi_nutr
+LAGOSdepth <- LAGOSdata$lakes_limno
 
+LAGOSlocations <- left_join(LAGOSlocus, LAGOSstate, by = "state_zoneid") 
+LAGOStrophic <- left_join(LAGOSnutrient, LAGOSlocations, by = "lagoslakeid") %>%
+        select(lagoslakeid, sampledate, chla, tp, secchi, 
+         gnis_name, lake_area_ha, state, state_name) %>%
 ```
 
 Examine potential correlations among your predictor variables. If your predictor variables are highly correlated with each other, your model will suffer from *multicollinearity,* essentially that two or more of your predictor variables provide redundant information. Model fit and accuracy of model coefficients suffer when multicollinearity is present. 
