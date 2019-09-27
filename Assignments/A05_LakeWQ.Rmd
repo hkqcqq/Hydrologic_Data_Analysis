@@ -1,6 +1,6 @@
 ---
 title: "Assignment 5: Water Quality in Lakes"
-author: "Student Name"
+author: "Keqi He"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -28,7 +28,21 @@ The completed exercise is due on 2 October 2019 at 9:00 am.
 4. Load the LAGOSdata database and the trophic state index csv file we created on 2019/09/27.
 
 ```{r setup}
+getwd()
 
+#install.packages("tidyverse")
+#install.packages("lubridate")
+#install.packages("LAGOSNE")
+
+packages <- c("tidyverse", 
+              "lubridate", 
+              "LAGOSNE")
+invisible(lapply(packages, library, character.only = TRUE))
+
+theme_set(theme_classic())
+
+load(file = "./Data/Raw/LAGOSdata.rda")
+LAGOStrophic <- read.csv("./Data/LAGOStrophic.csv")
 ```
 
 ## Trophic State Index
@@ -36,25 +50,43 @@ The completed exercise is due on 2 October 2019 at 9:00 am.
 5. Similar to the trophic.class column we created in class (determined from TSI.chl values), create two additional columns in the data frame that determine trophic class from TSI.secchi and TSI.tp (call these trophic.class.secchi and trophic.class.tp). 
 
 ```{r}
-
+LAGOStrophic <-
+   mutate(LAGOStrophic, 
+          trophic.class.secchi = 
+            ifelse(TSI.secchi < 40, "Oligotrophic", 
+                   ifelse(TSI.secchi < 50, "Mesotrophic",
+                          ifelse(TSI.secchi < 70, "Eutrophic", "Hypereutrophic"))),
+          trophic.class.tp = 
+            ifelse(TSI.tp < 40, "Oligotrophic", 
+                   ifelse(TSI.tp < 50, "Mesotrophic",
+                          ifelse(TSI.tp < 70, "Eutrophic", "Hypereutrophic"))))
 ```
 
 
 6. How many observations fall into the four trophic state categories for the three metrics (trophic.class, trophic.class.secchi, trophic.class.tp)? Hint: `count` function.
 
 ```{r}
-
+LAGOStrophic %>% count(trophic.class)
+LAGOStrophic %>% count(trophic.class.secchi)
+LAGOStrophic %>% count(trophic.class.tp)
 ```
 
 7. Find and quantify instances where trophic.class and trophic.class.secchi differ. Do the same comparing trophic.class and trophic.class.tp. 
 
 ```{r}
-
+LAGOStrophic <-
+  mutate(LAGOStrophic,
+         trophic.class.differ.secchi = 
+           ifelse(trophic.class == trophic.class.secchi, "same", "different"),
+         trophic.class.differ.tp = 
+           ifelse(trophic.class == trophic.class.tp, "same", "different"))
+LAGOStrophic %>% count(trophic.class.differ.secchi)
+LAGOStrophic %>% count(trophic.class.differ.tp)
 ```
 
 What proportion of observations do these metrics differ?
 
-> 
+>  63.29% of observations differ in trophic states of chlorophyll a concentration and trophic states of secchi disk transparency. 64.54% of observations differ in trophic states of chlorophyll a concentration and trophic states of total phosphorus (TP).
 
 Note: To take this further, a researcher might determine which trophic classes are susceptible to being differently categorized by the different metrics and whether certain metrics are prone to categorizing trophic class as more or less eutrophic. This would entail more complex code.
 
@@ -63,12 +95,27 @@ Note: To take this further, a researcher might determine which trophic classes a
 8. Create a data frame that includes the columns lagoslakeid, sampledate, tn, tp, state, and state_name. Mutate this data frame to include sampleyear and samplemonth columns as well. Call this data frame LAGOSNandP. 
 
 ```{r}
+LAGOSlocus <- LAGOSdata$locus
+LAGOSstate <- LAGOSdata$state
+LAGOSnutrient <- LAGOSdata$epi_nutr
 
+LAGOSlocations <- left_join(LAGOSlocus, LAGOSstate, by = "state_zoneid") 
+LAGOSNandP <-
+   left_join(LAGOSnutrient, LAGOSlocations, by = "lagoslakeid") %>%
+   select(lagoslakeid, sampledate, tn, tp, state, state_name) %>%
+   mutate(sampleyear = year(sampledate), 
+         samplemonth = month(sampledate))
 ```
 
 9. Create two violin plots comparing TN and TP concentrations across states. Include a 50th percentile line inside the violins.
 ```{r}
+LAGOSTNviolin <- ggplot(LAGOSNandP, aes(x = state, y = tn)) +
+  geom_violin(draw_quantiles = 0.50)
+print(LAGOSTNviolin)
 
+LAGOSTPviolin <- ggplot(LAGOSNandP, aes(x = state, y = tp)) +
+  geom_violin(aes(fill = state),draw_quantiles = 0.50) 
+print(LAGOSTPviolin)
 ```
 
 Which states have the highest and lowest median concentrations?
