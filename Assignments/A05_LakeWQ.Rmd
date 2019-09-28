@@ -71,22 +71,20 @@ LAGOStrophic %>% count(trophic.class.secchi)
 LAGOStrophic %>% count(trophic.class.tp)
 ```
 
-7. What proportion of total observations are considered eutrohic or hypereutrophic according to the three different metrics (trophic.class, trophic.class.secchi, trophic.class.tp)?
+7. What proportion of total observations are considered eutrophic or hypereutrophic according to the three different metrics (trophic.class, trophic.class.secchi, trophic.class.tp)?
 
 ```{r}
-LAGOStrophic <-
-  mutate(LAGOStrophic,
-         trophic.class.differ.secchi = 
-           ifelse(trophic.class == trophic.class.secchi, "same", "different"),
-         trophic.class.differ.tp = 
-           ifelse(trophic.class == trophic.class.tp, "same", "different"))
-LAGOStrophic %>% count(trophic.class.differ.secchi)
-LAGOStrophic %>% count(trophic.class.differ.tp)
+mean(LAGOStrophic$trophic.class == "Eutrophic")
+mean(LAGOStrophic$trophic.class == "Hypereutrophic")
+mean(LAGOStrophic$trophic.class.secchi == "Eutrophic")
+mean(LAGOStrophic$trophic.class.secchi == "Hypereutrophic")
+mean(LAGOStrophic$trophic.class.tp == "Eutrophic")
+mean(LAGOStrophic$trophic.class.tp == "Hypereutrophic")
 ```
 
 Which of these metrics is most conservative in its designation of eutrophic conditions? Why might this be?
 
->  63.29% of observations differ in trophic states of chlorophyll a concentration and trophic states of secchi disk transparency. 64.54% of observations differ in trophic states of chlorophyll a concentration and trophic states of total phosphorus (TP).
+>  Secchi disk transparency. Among three different metrics (trophic.class, trophic.class.secchi, trophic.class.tp), proportion of total observations considered eutrophic or hypereutrophic is smallest. Reasons: some dissolved organic matters, phosphorus or nitrogens that are colorless and transparent do not influence secchi disk transparenvy and therefore secchi disk transparenvy is most conservative in its designation of eutrophic conditions
 
 Note: To take this further, a researcher might determine which trophic classes are susceptible to being differently categorized by the different metrics and whether certain metrics are prone to categorizing trophic class as more or less eutrophic. This would entail more complex code.
 
@@ -110,48 +108,79 @@ LAGOSNandP <-
 9. Create two violin plots comparing TN and TP concentrations across states. Include a 50th percentile line inside the violins.
 ```{r}
 LAGOSTNviolin <- ggplot(LAGOSNandP, aes(x = state, y = tn)) +
-  geom_violin(draw_quantiles = 0.50)
+  geom_violin(draw_quantiles = 0.50) +
+  labs(y = expression(Total ~ N ~ (mu*g / L)))
 print(LAGOSTNviolin)
 
 LAGOSTPviolin <- ggplot(LAGOSNandP, aes(x = state, y = tp)) +
-  geom_violin(aes(fill = state),draw_quantiles = 0.50) 
+  geom_violin(draw_quantiles = 0.50) +
+  labs(y = expression(Total ~ P ~ (mu*g / L)))
 print(LAGOSTPviolin)
 ```
 
 Which states have the highest and lowest median concentrations?
 
-> TN:
+> TN: IA (highest), VT (lowest)
 
-> TP:
+> TP: IL (highest), ME (lowest)
 
 Which states have the highest and lowest concentration ranges?
 
-> TN: 
+> TN: IA (highest), VT (lowest)
 
-> TP: 
+> TP: IL (highest), PA (lowest)
 
 10. Create two jitter plots comparing TN and TP concentrations across states, with samplemonth as the color. Choose a color palette other than the ggplot default.
 
 ```{r}
+stateTNjitter <- ggplot(LAGOSNandP, aes(x = state, y = tn, color = samplemonth)) +
+  geom_jitter(alpha = 0.3) +
+  labs(y = expression(Total ~ N ~ (mu*g / L)), color = "Month") +
+  scale_color_viridis_c(option = "inferno")
+print(stateTNjitter)
 
+stateTPjitter <- ggplot(LAGOSNandP, aes(x = state, y = tp, color = samplemonth)) +
+  geom_jitter(alpha = 0.3) +
+  labs(y = expression(Total ~ P ~ (mu*g / L)), color = "Month") +
+  scale_color_viridis_c(option = "inferno")
+print(stateTPjitter)
 ```
 
 Which states have the most samples? How might this have impacted total ranges from #9?
+```{r}
+TN <- filter(LAGOSNandP, state == "ME")
+TN2 <- filter(TN, samplemonth == 12)
+TN1 <- filter(TN2, tn > 0)
+```
 
-> TN:
+> TN: MO
 
-> TP: 
+> TP: WI
+
+> The range will increase accordingly as the number of samples increases. But, it does not mean the most samples lead to biggest total range. More sample size makes the range more convincing and representative.
 
 Which months are sampled most extensively? Does this differ among states?
 
-> TN:
+> TN: July
 
-> TP: 
+> TP: August
+
+> Yes, this differ among states. Like ME sampled total nitrogens most extensively in August. But almost every state sampled total nitrogens and total phosphorus most extensively in summer (mainly in July and August).
 
 11. Create two jitter plots comparing TN and TP concentrations across states, with sampleyear as the color. Choose a color palette other than the ggplot default.
 
 ```{r}
+stateTNjitteryear <- ggplot(LAGOSNandP, aes(x = state, y = tn, color = sampleyear)) +
+  geom_jitter(alpha = 0.3) +
+  labs(y = expression(Total ~ N ~ (mu*g / L)), color = "Year") +
+  scale_color_viridis_c(option = "plasma")
+print(stateTNjitteryear)
 
+stateTPjitteryear <- ggplot(LAGOSNandP, aes(x = state, y = tp, color = sampleyear)) +
+  geom_jitter(alpha = 0.3) +
+  labs(y = expression(Total ~ P ~ (mu*g / L)), color = "Year") +
+  scale_color_viridis_c(option = "plasma")
+print(stateTPjitteryear)
 ```
 
 
