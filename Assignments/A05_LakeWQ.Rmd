@@ -71,7 +71,7 @@ LAGOStrophic %>% count(trophic.class.secchi)
 LAGOStrophic %>% count(trophic.class.tp)
 ```
 
-7. Find and quantify instances where trophic.class and trophic.class.secchi differ. Do the same comparing trophic.class and trophic.class.tp. 
+7. What proportion of total observations are considered eutrohic or hypereutrophic according to the three different metrics (trophic.class, trophic.class.secchi, trophic.class.tp)?
 
 ```{r}
 LAGOStrophic <-
@@ -84,7 +84,7 @@ LAGOStrophic %>% count(trophic.class.differ.secchi)
 LAGOStrophic %>% count(trophic.class.differ.tp)
 ```
 
-What proportion of observations do these metrics differ?
+Which of these metrics is most conservative in its designation of eutrophic conditions? Why might this be?
 
 >  63.29% of observations differ in trophic states of chlorophyll a concentration and trophic states of secchi disk transparency. 64.54% of observations differ in trophic states of chlorophyll a concentration and trophic states of total phosphorus (TP).
 
