@@ -15,7 +15,7 @@ editor_options:
 
 ## Opening Discussion
 What are the major water quality impairments experienced in lakes?  
-
+dissolved oxygen, nutrients, microbes, odor/ color, invasive species, contaminants
 ## Session Set Up
 
 ```{r}
@@ -27,7 +27,7 @@ library(lubridate)
 library(LAGOSNE)
 
 theme_set(theme_classic())
-options(scipen = 100)
+options(scipen = 100) # bigger than 100 show the exact value
 
 lagosne_get(dest_folder = LAGOSNE:::lagos_path(), overwrite = TRUE)
 
@@ -49,12 +49,12 @@ LAGOSdata <- lagosne_load()
 names(LAGOSdata)
 
 # If the package installation and data download has not worked, use this code: 
-# load(file = "./Data/Raw/LAGOSdata.rda")
+#load(file = "./Data/Raw/LAGOSdata.rda")
 
 # Exploring the data types that are available
 LAGOSlocus <- LAGOSdata$locus
 LAGOSstate <- LAGOSdata$state
-LAGOSnutrient <- LAGOSdata$epi_nutr
+LAGOSnutrient <- LAGOSdata$epi_nutr # database only have surface data
 
 # Tell R to treat lakeid as a factor, not a numeric value
 LAGOSlocus$lagoslakeid <- as.factor(LAGOSlocus$lagoslakeid)
@@ -70,7 +70,7 @@ For example, let's find out how many lakes are in each state. Note that LAGOSloc
 Add notes about each line of code as we go along. What does each function do?
 ```{r}
 # Join data frames
-LAGOSlocations <- left_join(LAGOSlocus, LAGOSstate, by = "state_zoneid")
+LAGOSlocations <- left_join(LAGOSlocus, LAGOSstate, by = "state_zoneid") # add column from the right
 
 # Order by number of lakes
 LAGOSlocations <- 
@@ -89,8 +89,8 @@ Robert Carlson's 1977 paper, "A trophic state index for lakes," established the 
 To calculate the **Trophic State Index**, three variables can be used. Note these should not be used to define trophic state but as indicators of the broader condition. Comparing these values in a given lake can give insight into the broader mechanisms at play.
 
 * *chlorophyll a concentration*, a proxy for algal (phytoplankton) biomass. Pros: direct measure of primary productivity
-* *Secchi disk transparency*, a measure of water clarity. Pros: simple and cheap. Cons: may yield a high TSI in highly colored lakes and in lakes where particulate matter is comprised of non-algal material 
-* *Total phosphorus (TP)*, a nutrient essential for growth of primary producers. Assumptions: phosphorus is the limiting nutrient for phytoplankton growth (this assumption often holds only for summer months)
+* *Secchi disk transparency*, a measure of water clarity. Pros: simple and cheap. Cons: may yield a high TSI in highly colored lakes and in lakes where particulate matter is comprised of non-algal material #dissolved organic, suspend sediments, shadow
+* *Total phosphorus (TP)*, a nutrient essential for growth of primary producers. Assumptions: phosphorus is the limiting nutrient for phytoplankton growth (this assumption often holds only for summer months) # vary with seasons
 
 $TSI(Chl) = 10(6 - (2.04 - 0.68 ln Chl/ln 2))$
 
@@ -116,7 +116,7 @@ LAGOStrophic <-
   mutate(sampleyear = year(sampledate), 
          samplemonth = month(sampledate), 
          season = as.factor(quarter(sampledate, fiscal_start = 12))) %>%
-  drop_na(chla:secchi)
+  drop_na(chla:secchi) #remove entire row that has NA in chla or secchi
 
 levels(LAGOStrophic$season) <- c("Winter", "Spring", "Summer", "Fall")
 ```
@@ -126,7 +126,7 @@ Let's look at observations of chl, secchi depth, and TP seasonally and over the 
 chlbymonth <-  
 ggplot(LAGOStrophic, 
        aes(x = as.factor(samplemonth), y = chla, color = sampleyear)) +
-  geom_jitter(alpha = 0.2) +
+  geom_jitter(alpha = 0.2) + #width of one month
   labs(x = "Month", y = expression(Chlorophyll ~ a ~ (mu*g / L)), color = "Year") +
   scale_color_viridis_c(option = "magma")
 print(chlbymonth)
@@ -150,14 +150,14 @@ print(tpbymonth)
 
 What do you notice about the seasonality of these variables? If we were to characterize a lake based on the value of a given variable, how might seasonality affect our interpretations?
 
->
+> 
 
 ### Calculating trophic state index
 Let's add a TSI value calculated from each of the three variables to the data frame. Let's also add a column that designates the lake as oligotrophic, mesotrophic, eutrophic, or hypereutrophic based on the TSI.chl value. Make notes about the code as we go along.
 ```{r}
 LAGOStrophic <- 
   mutate(LAGOStrophic, 
-         TSI.chl = round(10*(6 - (2.04 - 0.68*log(chla)/log(2)))),
+         TSI.chl = round(10*(6 - (2.04 - 0.68*log(chla)/log(2)))), #log is natural log, log10 is based on 10
          TSI.secchi = round(10*(6 - (log(secchi)/log(2)))), 
          TSI.tp = round(10*(6 - (log(48/tp)/log(2)))), 
          trophic.class = 
@@ -235,11 +235,16 @@ print(stateTSIjitter)
 ```
 What insights do we gain from the different visualizations?
 
-> Violin: 
+> Violin: distribution, not show the number of data
 
-> Bar: 
+> Bar: we can know the number of data 
 
 > Jitter:
 
 ## Closing Discussion
 What factors might you expect to influence TSI scores in a given area? What are some variables in the LAGOSNE database that could help you test your hypothesis?
+
+```{r}
+write.csv(LAGOStrophic, "./Data/LAGOStrophic.csv", row.names = FALSE)
+```
+
