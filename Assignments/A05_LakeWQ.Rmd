@@ -15,8 +15,8 @@ This exercise accompanies the lessons in Hydrologic Data Analysis on water quali
 1. Change "Student Name" on line 3 (above) with your name.
 3. Work through the steps, **creating code and output** that fulfill each instruction.
 4. Be sure to **answer the questions** in this assignment document.
-6. When you have completed the assignment, **Knit** the text and code into a single HTML file.
-8. After Knitting, submit the completed exercise (HTML file) to the dropbox in Sakai. Add your last name into the file name (e.g., "A05_Salk.html") prior to submission.
+6. When you have completed the assignment, **Knit** the text and code into a single PDF file.
+8. After Knitting, submit the completed exercise (PDF file) to the dropbox in Sakai. Add your last name into the file name (e.g., "A05_Salk.pdf") prior to submission.
 
 The completed exercise is due on 2 October 2019 at 9:00 am.
 
@@ -147,11 +147,6 @@ print(stateTPjitter)
 ```
 
 Which states have the most samples? How might this have impacted total ranges from #9?
-```{r}
-TN <- filter(LAGOSNandP, state == "ME")
-TN2 <- filter(TN, samplemonth == 12)
-TN1 <- filter(TN2, tn > 0)
-```
 
 > TN: MO
 
@@ -165,7 +160,7 @@ Which months are sampled most extensively? Does this differ among states?
 
 > TP: August
 
-> Yes, this differ among states. Like ME sampled total nitrogens most extensively in August. But almost every state sampled total nitrogens and total phosphorus most extensively in summer (mainly in July and August).
+> Yes, this differs among states. Like ME sampled total nitrogens most extensively in August. But almost every state sampled total nitrogens and total phosphorus most extensively in summer (mainly in July and August).
 
 11. Create two jitter plots comparing TN and TP concentrations across states, with sampleyear as the color. Choose a color palette other than the ggplot default.
 
@@ -186,23 +181,25 @@ print(stateTPjitteryear)
 
 Which years are sampled most extensively? Does this differ among states?
 
-> TN:
+> TN: 2009
 
-> TP: 
+> TP: 2009
+
+> Yes, this differs among states. Like ME sampled total phosphorus most extensively in 1976.
 
 ## Reflection
 12. What are 2-3 conclusions or summary points about lake water quality you learned through your analysis?
 
->
+> Dissolved oxygen, nutrients, microbes, odor/ color, invasive species, contaminants, etc are major water quality impairments experienced in lakes. Trophic state given by Robert Carlson in 1977 is a useful water quality metric which means the amount of biomass a given system can sustain. To calculate the Trophic State Index, three variables can be used: chlorophyll a concentration, Secchi disk transparency and Total phosphorus (TP).
 
 13. What data, visualizations, and/or models supported your conclusions from 12?
 
-> 
+> Data used includes LAGOSdata database and the trophic state index data. Ggplot, Violin plots and jitter plots are used to draw those conclusions.
 
 14. Did hands-on data analysis impact your learning about water quality relative to a theory-based lesson? If so, how?
 
->
+> Yes. Hands-on data analysis can help me learn lake water quality greatly. It is more vivid and memorable and can help me understand the theory better.
 
 15.	How did the real-world data compare with your expectations from theory?
 
->
+> Real-world data is complicated and imperfect because there are lots of factors can affect the value of real-world data.Different states have different measurement extensity. But in general, real-world data has a theoretical law.
