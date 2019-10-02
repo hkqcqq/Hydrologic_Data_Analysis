@@ -66,9 +66,18 @@ LAGOSnutrient <- LAGOSdata$epi_nutr
 LAGOSdepth <- LAGOSdata$lakes_limno
 
 LAGOSlocations <- left_join(LAGOSlocus, LAGOSstate, by = "state_zoneid") 
-LAGOStrophic <- left_join(LAGOSnutrient, LAGOSlocations, by = "lagoslakeid") %>%
-        select(lagoslakeid, sampledate, chla, tp, secchi, 
-         gnis_name, lake_area_ha, state, state_name) %>%
+LAGOSL <- left_join(LAGOSlocations, LAGOSdepth, by = "lagoslakeid") 
+LAGOStrophic <- left_join(LAGOSnutrient, LAGOSL, by = "lagoslakeid") %>%
+        select(lagoslakeid, sampledate, chla, maxdepth, secchi, 
+         doc,tn,tp, state, state_name) %>%
+    mutate(sampleyear = year(sampledate), 
+         samplemonth = month(sampledate), 
+         season = as.factor(quarter(sampledate, fiscal_start = 12))) %>%
+ drop_na(tn:tp) %>%
+ drop_na(secchi:doc) %>%
+ drop_na(chla:maxdepth) 
+
+levels(LAGOStrophic$season) <- c("Winter", "Spring", "Summer", "Fall")
 ```
 
 Examine potential correlations among your predictor variables. If your predictor variables are highly correlated with each other, your model will suffer from *multicollinearity,* essentially that two or more of your predictor variables provide redundant information. Model fit and accuracy of model coefficients suffer when multicollinearity is present. 
@@ -76,7 +85,8 @@ Examine potential correlations among your predictor variables. If your predictor
 1. Create a correlation plot for your 7 variables of interest (TN, TP, and the five predictor variables). What patterns do you see? (hint: function `corrplot` in the corrplot package. I like to use `upper = "ellipse"` inside the function).
 
 ```{r}
-
+M <- cor(LAGOStrophic[,3:8])
+LAGOStrophic.cor <- corrplot(M, method = "square", type = "lower")
 ```
 
 What patterns do you see?
@@ -86,7 +96,10 @@ What patterns do you see?
 2. Create two linear regression models (hint: function `lm`) to predict TN and TP using your five predictor variables. 
 
 ```{r}
-
+LAGOStrophic.tnlm <- lm(data = LAGOStrophic, tn ~ chla + secchi + state + doc + maxdepth)
+summary(LAGOStrophic.tnlm)
+LAGOStrophic.tplm <- lm(data = LAGOStrophic, tp ~ chla + secchi + state + doc + maxdepth)
+summary(LAGOStrophic.tplm)
 ```
 
 How much variance in TN and TP is accounted for by your full model?

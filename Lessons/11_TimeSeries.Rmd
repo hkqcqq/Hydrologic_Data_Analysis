@@ -61,7 +61,7 @@ ClearCreekDischarge <- readNWISdv(siteNumbers = "06719505",
                      parameterCd = "00060", # discharge (ft3/s)
                      startDate = "",
                      endDate = "")
-names(ClearCreekDischarge)[4:5] <- c("Discharge", "Approval.Code")
+names(ClearCreekDischarge)[4:5] <-c("Discharge", "Approval.Code")
 class(ClearCreekDischarge$Date)
 
 # Learn about the variables and site
@@ -76,8 +76,8 @@ ClearCreekPlot <-
   theme(plot.title = element_text(margin = margin(b = -10), size = 12), 
        axis.title.x = element_blank())
 print(ClearCreekPlot)
-
 ```
+Cyclical(longer intervals) vs. seasonal cycles
 
 The simplest option to characterize a time series is a linear regression. 
 ```{r}
@@ -93,7 +93,7 @@ print(ClearCreekRegressionPlot)
 
 Is a linear regression an appropriate model for the data in this case? Why or why not?
 
-> 
+> no
 
 Are there situations where it would be appropriate to use a linear regression to model a time series? If so, what is an example?
 
@@ -112,9 +112,10 @@ A given time series can be made up of several component series:
 We first need to turn the discharge data into a time series object in R. This is done using the `ts` function. Notice we can only specify one column of data and need to specify the period at which the data are sampled. The resulting time series object cannot be viewed like a regular data frame.
 
 Note: time series objects must be equispaced, which requires interpolation if the data have not been collected at regular intervals. In our case, we have daily data with no NAs in the data frame, so we don't need to worry about this.
+can not just drop those NAs
 ```{r}
 ClearCreek_ts <- ts(ClearCreekDischarge[[4]], frequency = 365)
-
+table(diff(ClearCreekDischarge$Date))
 ```
 
 The `stl` function decomposes the time series object into its component parts. We must specify that the window for seasonal extraction is either "periodic" or a specific number of at least 7. The decomposition proceeds through a loess (locally estimated scatterplot smoothing) function.
