@@ -1,0 +1,82 @@
+---
+title: "Assignment 6: Time Series Analysis"
+author: "Student Name"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## OVERVIEW
+
+This exercise accompanies the lessons in Hydrologic Data Analysis on time series analysis
+
+## Directions
+1. Change "Student Name" on line 3 (above) with your name.
+2. Work through the steps, **creating code and output** that fulfill each instruction.
+3. Be sure to **answer the questions** in this assignment document.
+4. When you have completed the assignment, **Knit** the text and code into a single pdf file.
+5. After Knitting, submit the completed exercise (pdf file) to the dropbox in Sakai. Add your last name into the file name (e.g., "A06_Salk.html") prior to submission.
+
+The completed exercise is due on 11 October 2019 at 9:00 am.
+
+## Setup
+
+1. Verify your working directory is set to the R project file, 
+2. Load the tidyverse, lubridate, trend, and dataRetrieval packages. 
+3. Set your ggplot theme (can be theme_classic or something else)
+4. Load the ClearCreekDischarge.Monthly.csv file from the processed data folder. Call this data frame ClearCreekDischarge.Monthly.
+
+```{r setup}
+
+```
+
+## Time Series Decomposition
+5. Create a new data frame that includes daily mean discharge at the Eno River for all available dates (`siteNumbers = "02085070"`). Rename the columns accordingly.
+6. Plot discharge over time with geom_line. Make sure axis labels are formatted appropriately.
+7. Create a time series of discharge
+8. Decompose the time series using the `stl` function.
+9. Visualize the decomposed time series.
+```{r}
+
+```
+
+10. How do the seasonal and trend components of the decomposition compare to the Clear Creek discharge dataset? Are they similar in magnitude?
+
+> Seasonal: 
+
+> Trend: 
+
+## Trend Analysis
+Research question: Has there been a monotonic trend in discharge in Clear Creek over the period of study?
+
+11. Generate a time series of monthly discharge in Clear Creek from the ClearCreekDischarge.Monthly data frame. This time series should include just one column (discharge). 
+12. Run a Seasonal Mann-Kendall test on the monthly discharge data. Inspect the overall trend and the monthly trends. 
+```{r}
+
+```
+
+13. Is there an overall monotonic trend in discharge over time? If so, is it positive or negative?
+
+> 
+
+14. Are there any monthly monotonic trends in discharge over time? If so, during which months do they occur and are they positive or negative?
+
+> 
+
+## Reflection
+15. What are 2-3 conclusions or summary points about time series you learned through your analysis?
+
+>
+
+16. What data, visualizations, and/or models supported your conclusions from 12?
+
+> 
+
+17. Did hands-on data analysis impact your learning about time series relative to a theory-based lesson? If so, how?
+
+>
+
+18.	How did the real-world data compare with your expectations from theory?
+
+>

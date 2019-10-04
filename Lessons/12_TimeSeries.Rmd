@@ -1,0 +1,223 @@
+---
+title: "12: Time Series Analysis"
+author: "Hydrologic Data Analysis | Kateri Salk"
+date: "Fall 2019"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## Lesson Objectives
+1. Choose appropriate time series analyses for trend detection and forecasting
+2. Discuss the influence of seasonality on time series analysis
+3. Interpret and communicate results of time series analyses 
+
+## Session Set Up
+
+```{r, message = FALSE}
+getwd()
+
+library(tidyverse)
+library(lubridate)
+library(dataRetrieval)
+library(LAGOSNE)
+#install.packages("trend")
+library(trend)
+#install.packages("forecast")
+library(forecast)
+#install.packages(tseries)
+library(tseries)
+
+theme_set(theme_classic())
+
+LAGOSdata <- lagosne_load()
+```
+
+## Trend analysis
+
+Two types of trends may be present in our time series dataset: **monotonic** or **step**. Monotonic trends are a gradual shift over time that is consistent in direction, for example in response to land use change. Step trends are a distinct shift at a given time point, for example in response to a policy being enacted. 
+
+### Step trend analysis
+
+Step trend analysis works well for upstream/downstream and before/after study design. We will not delve into these methods during class, but specific tests are listed below for future reference. 
+
+Note: ALWAYS look into the assumptions of a given test to ensure it matches with your data and with your research question.
+
+* **Change point detection**, e.g., `pettitt.test` (package: trend) or `breakpoints` (package: strucchange)
+* **t-test (paired or unpaired)**
+* **Kruskal-Wallis test**: non-parametric version of t-test
+* **ANCOVA**, analysis of covariance
+
+### Monotonic trend analysis
+
+In general, detecting a monotonic trend requires a long sequence of data with few gaps. If we are working with monthly data, a time series of at least five years is recommended. Gaps can be accounted for, but a gap that makes up more than 1/3 of the sampling period is generally considered the threshold for considering a gap to be too long (a step trend analysis might be better in this situation). 
+
+Adjusting the data may be necessary to fulfill the assumptions of a trend test. These adjustments include **aggregation**, **subsampling**, and **interpolation**. What do each of these mean, and why might we want to use them?
+
+> aggregation: 
+
+> subsampling: 
+
+> interpolation: 
+
+Specific tests for monotonic trend analysis are listed below, with assumptions and tips: 
+
+* **linear regression**: no seasonality, fits the assumptions of a parametric test. Function: `lm`
+* **Mann-Kendall**: no seasonality, non-parametric, no temporal autocorrelation, missing data allowed. Function: `mk.test` (package: trend)
+* **modified Mann-Kendall**: no seasonality, non-parametric, accounts for temporal autocorrelation, missing data allowed. Function: `mmky` and `mmkh` (package: modifiedmk)
+* **Seasonal Mann-Kendall**: seasonality, non-parametric, no temporal autocorelation, identical distribution. Function: `smk.test` (package: trend)
+
+The packages trend, Kendall, and modifiedmk also include other modifications to monotonic trend tests. Look into the documentation for these packages if you are applying a special case.
+
+If covariates (another predictor variable) are included in the dataset, additional tests are recommended. A great resource for trend testing for water quality monitoring, which includes guidance on these cases, has been prepared by the Environmental Protection Agency: https://www.epa.gov/sites/production/files/2016-05/documents/tech_notes_6_dec2013_trend.pdf
+
+### Trend test example: TP in Lake Mendota
+
+Lake Mendota (Wisconsin, USA) is often considered the birthplace of limnology and the most well-studied lake in the world. It has been sampled for over 100 years, and several parts of this dataset are included in the LAGOSNE database. 
+
+Today we will work with total phosphorus data from Lake Mendota to determine whether there has been a monotonic trend in these concentrations over time. 
+
+```{r}
+# create a dataframe for nutrients
+LAGOSnutrient <- LAGOSdata$epi_nutr
+
+# what information is available for Lake Mendota?
+lake_info(name = "Lake Mendota", state = "Wisconsin")
+  # lake_info can return info about a lake if you input name + state or lake id.
+
+# Wrangle a dataset with just Lake Mendota TP time series
+Mendotadata <- LAGOSnutrient %>%
+  filter(lagoslakeid == 5371) %>%
+  select(sampledate, tp)
+
+# What do these data look like?
+MendotaTP <-
+ggplot(Mendotadata, aes(x = sampledate, y = tp)) +
+  geom_point()
+print(MendotaTP)
+```
+
+It is crucially important to visualize your time series before moving forward with any test. In this case, we notice two major issues: 
+
+1. There is a large gap in monitoring in the 1980s
+2. There is an unusually large TP value in September 2000
+
+Detecting whether the outlier is a true measurement or a mistake in the dataset would be recommended at this point. Regardless, we know that a single large point that is more than 3x the value of the next largest value in the dataset will interfere with answering our question, particularly if we use this value for interpolation. Let's choose to leave this value out of the dataset for our purposes today (a more thorough QA/QC check would be recommended though).
+
+```{r}
+# Remove issues 1 and 2, arrange by date
+Mendotadata <- Mendotadata %>%
+  filter(tp < 300 & sampledate > "1988-01-01") %>%
+  arrange(sampledate)
+
+# Re-plot data
+MendotaTP <-
+ggplot(Mendotadata, aes(x = sampledate, y = tp)) +
+  geom_point() +
+  geom_line()
+print(MendotaTP)
+```
+
+We see distinct seasonality, with higher TP values occurring in the winter compared to summer. Therefore, we will proceed with a **Seasonal Mann-Kendall** test. 
+
+We see that TP data were collected somewhere between biweekly and monthly across the sampling period. However, the SMK test requires identically distributed data. We will therefore interpolate the data to generate monthly values for TP. 
+
+Common interpolation methods: 
+
+* **Piecewise constant**: <fill in notes here>
+* **Linear**: <fill in notes here>
+* **Spline**: <fill in notes here>
+
+Linear interpolation is most common for water quality data, and fits with our understanding about how TP might change over time in this system. 
+```{r}
+# Generate monthly values from July 1988 to August 2013
+linearinterpolation <- as.data.frame(approx(Mendotadata, n = 303, method = "linear"))
+linearinterpolation$x <- as.Date(linearinterpolation$x, origin = "1970-01-01")
+names(linearinterpolation) <- c("Date", "TP")
+
+# Inspect interpolated values 
+MendotaTPinterpolated <-
+ggplot(Mendotadata, aes(x = sampledate, y = tp)) +
+  geom_point() +
+  geom_line() +
+  geom_point(data = linearinterpolation, aes(x = Date, y = TP), color = "#c13d75ff") 
+print(MendotaTPinterpolated)
+
+# Generate time series (smk.test needs ts, not data.frame)
+Mendotatimeseries <- ts(linearinterpolation$TP, frequency = 12, 
+                        start = c(1988, 7, 5), end = c(2013, 8, 5))
+# Run SMK test
+Mendotatrend <- smk.test(Mendotatimeseries)
+
+# Inspect results
+Mendotatrend
+summary(Mendotatrend)
+
+```
+
+What would we conclude based on these findings? Describe as you would to an educated but non-specialist audience.
+
+>
+ 
+If a significant trend was present, we could compute a **Sen's Slope** to quantify that trend (`sens.slope` function in the trend package).
+ 
+## Autoregressive and Moving Average Models (ARMA)
+
+We might be interested in characterizing a time series in order to understand what happened in the past and to effectively forecast into the future. Two common models that can approximate time series are **autoregressive** and **moving average** models. To classify these models, we use the  **ACF (autocorrelation function)** and the **PACF (partial autocorrelation function)**, which correspond to the autocorrelation of a series and the correlation of the residuals, respectively. 
+
+**Autoregressive** models operate under the framework that a given measurements is correlated with  previous measurements. For example, an AR1 formulation dictates that a measurement is dependent on the previous measurement, and the value can be predicted by quantifying the lag. 
+
+**Moving average** models operate under the framework that the covariance between a measurement and the previous measurement is zero. While AR models use past forecast *values* to predict future values, MA models use past forecast *errors* to predict future values.
+
+Let's look at how ACF and PACF lags look under different formulations of AR and MA models. 
+https://nwfsc-timeseries.github.io/atsa-labs/sec-tslab-autoregressive-ar-models.html
+https://nwfsc-timeseries.github.io/atsa-labs/sec-tslab-moving-average-ma-models.html
+
+Let's upload the Clear Creek discharge dataset. We will **aggregate** the data by averaging monthly values. We will then turn this into a time series, which is the format needed for ARMA modeling. 
+```{r}
+ClearCreekDischarge <- readNWISdv(siteNumbers = "06719505",
+                     parameterCd = "00060", # discharge (ft3/s)
+                     startDate = "",
+                     endDate = "")
+names(ClearCreekDischarge)[4:5] <- c("Discharge", "Approval.Code")
+
+ClearCreekDischarge.Monthly <- ClearCreekDischarge %>%
+  mutate(Year = year(Date), 
+         Month = month(Date)) %>%
+  group_by(Year, Month) %>%
+  summarise(Discharge = mean(Discharge))
+    
+ClearCreek_ts <- ts(ClearCreekDischarge.Monthly[[3]], frequency = 12)
+
+```
+
+ARMA models require stationary data. This means that there is no monotonic trend over time and there is also equal variance and covariance across the time series. The function `adf.test` will determine whether our data are stationary. The null hypothesis is that the data are not stationary, so we infer that the data are stationary if the p-value is < 0.05.
+
+```{r}
+adf.test(ClearCreek_ts, alternative = "stationary")
+```
+
+Let's inspect the ACF and pacf plots. Notice these don't match up perfectly with just one AR or MA formulation, so we likely have interactions of both processes at play. 
+```{r}
+acf(ClearCreek_ts)
+pacf(ClearCreek_ts)
+```
+
+While some processes might be easy to identify, it is often complicated to predict the order of AR and MA processes when the operate in the same dataset. To get around this issue, we will run multiple potential formulations of the model and see which one results in the most parsimonious fit using AIC. The function `auto.arima` does this automatically.
+
+```{r}
+# run the arima function and search for best fit 
+auto.arima(ClearCreek_ts, trace = TRUE)
+
+# create an object that defines the best fit model
+fit <- arima(ClearCreek_ts, c(1, 0, 1),seasonal = list(order = c(2, 1, 0), period = 12))
+
+# make a prediction into the future
+ClearCreekprediction <- predict(fit, n.ahead = 10*12)
+
+# plot future predictions
+ts.plot(ClearCreek_ts, ClearCreekprediction$pred, lty = c(1, 3))
+```
+
+How do future predictions compare to the past? What other covariates might you bring into the analysis to improve forecasting capabilities?
