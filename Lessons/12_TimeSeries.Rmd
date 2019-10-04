@@ -55,17 +55,17 @@ In general, detecting a monotonic trend requires a long sequence of data with fe
 
 Adjusting the data may be necessary to fulfill the assumptions of a trend test. These adjustments include **aggregation**, **subsampling**, and **interpolation**. What do each of these mean, and why might we want to use them?
 
-> aggregation: 
+> aggregation: get the dataset together  
 
 > subsampling: 
 
-> interpolation: 
+> interpolation: filling in gaps
 
 Specific tests for monotonic trend analysis are listed below, with assumptions and tips: 
 
 * **linear regression**: no seasonality, fits the assumptions of a parametric test. Function: `lm`
 * **Mann-Kendall**: no seasonality, non-parametric, no temporal autocorrelation, missing data allowed. Function: `mk.test` (package: trend)
-* **modified Mann-Kendall**: no seasonality, non-parametric, accounts for temporal autocorrelation, missing data allowed. Function: `mmky` and `mmkh` (package: modifiedmk)
+* **modified Mann-Kendall**: no seasonality, non-parametric, accounts for temporal autocorrelation, missing data allowed. Function: `mmky` and `mmkh` (package: modifiedmk) #more conservative
 * **Seasonal Mann-Kendall**: seasonality, non-parametric, no temporal autocorelation, identical distribution. Function: `smk.test` (package: trend)
 
 The packages trend, Kendall, and modifiedmk also include other modifications to monotonic trend tests. Look into the documentation for these packages if you are applying a special case.
@@ -83,7 +83,7 @@ Today we will work with total phosphorus data from Lake Mendota to determine whe
 LAGOSnutrient <- LAGOSdata$epi_nutr
 
 # what information is available for Lake Mendota?
-lake_info(name = "Lake Mendota", state = "Wisconsin")
+lake_info(name = "Lake Mendota", state = "Wisconsin") #lots of lakes have same name
   # lake_info can return info about a lake if you input name + state or lake id.
 
 # Wrangle a dataset with just Lake Mendota TP time series
@@ -125,14 +125,14 @@ We see that TP data were collected somewhere between biweekly and monthly across
 
 Common interpolation methods: 
 
-* **Piecewise constant**: <fill in notes here>
+* **Piecewise constant**: <nearast neigborhood constant>
 * **Linear**: <fill in notes here>
 * **Spline**: <fill in notes here>
 
 Linear interpolation is most common for water quality data, and fits with our understanding about how TP might change over time in this system. 
 ```{r}
 # Generate monthly values from July 1988 to August 2013
-linearinterpolation <- as.data.frame(approx(Mendotadata, n = 303, method = "linear"))
+linearinterpolation <- as.data.frame(approx(Mendotadata, n = 303, method = "linear")) #30 days a month
 linearinterpolation$x <- as.Date(linearinterpolation$x, origin = "1970-01-01")
 names(linearinterpolation) <- c("Date", "TP")
 
@@ -153,12 +153,11 @@ Mendotatrend <- smk.test(Mendotatimeseries)
 # Inspect results
 Mendotatrend
 summary(Mendotatrend)
-
 ```
 
 What would we conclude based on these findings? Describe as you would to an educated but non-specialist audience.
 
->
+> significant decreasing trend in Octorber and November
  
 If a significant trend was present, we could compute a **Sen's Slope** to quantify that trend (`sens.slope` function in the trend package).
  
@@ -221,3 +220,4 @@ ts.plot(ClearCreek_ts, ClearCreekprediction$pred, lty = c(1, 3))
 ```
 
 How do future predictions compare to the past? What other covariates might you bring into the analysis to improve forecasting capabilities?
+> pretty uniform 
