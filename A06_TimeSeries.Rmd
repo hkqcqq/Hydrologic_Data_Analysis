@@ -1,6 +1,6 @@
 ---
 title: "Assignment 6: Time Series Analysis"
-author: "Student Name"
+author: "Keqi He"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -28,7 +28,22 @@ The completed exercise is due on 11 October 2019 at 9:00 am.
 4. Load the ClearCreekDischarge.Monthly.csv file from the processed data folder. Call this data frame ClearCreekDischarge.Monthly.
 
 ```{r setup}
+getwd()
 
+#install.packages("tidyverse")
+#install.packages("lubridate")
+#install.packages("trend")
+#install.packages("dataRetrieval")
+
+packages <- c("tidyverse", 
+              "lubridate",
+              "trend",
+              "dataRetrieval")
+invisible(lapply(packages, library, character.only = TRUE))
+
+theme_set(theme_classic())
+
+ClearCreekDischarge.Monthly <- read.csv(file = "./Data/Processed/ClearCreekDischarge.Monthly.csv")
 ```
 
 ## Time Series Decomposition
@@ -38,7 +53,26 @@ The completed exercise is due on 11 October 2019 at 9:00 am.
 8. Decompose the time series using the `stl` function.
 9. Visualize the decomposed time series.
 ```{r}
+EnoDischarge <- readNWISdv(siteNumbers = "02085070",
+                     parameterCd = "00060", # discharge (ft3/s)
+                     startDate = "",
+                     endDate = "")
+names(EnoDischarge)[4:5] <- c("Daily.Mean.Discharge", "Approval.Code")
 
+EnoDischargePlot <- 
+  ggplot(EnoDischarge,aes(x = Date, y = Daily.Mean.Discharge)) +
+  geom_line() +
+  labs(y = expression("Daily Mean Discharge (ft"^3*"/s)"))
+print(EnoDischargePlot)
+
+EnoDischargets <- EnoDischarge %>%
+  mutate(Year = year(Date), 
+         Month = month(Date),
+         Day = day(Date)) %>%
+  group_by(Year, Month, Day)
+
+Enotimeseries <- ts(EnoDischarge$Daily.Mean.Discharge, frequency = 366, 
+                        start = c(1963, 9, 1), end = c(2019, 11, 5))
 ```
 
 10. How do the seasonal and trend components of the decomposition compare to the Clear Creek discharge dataset? Are they similar in magnitude?
