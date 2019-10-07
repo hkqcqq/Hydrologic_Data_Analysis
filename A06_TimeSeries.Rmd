@@ -65,14 +65,16 @@ EnoDischargePlot <-
   labs(y = expression("Daily Mean Discharge (ft"^3*"/s)"))
 print(EnoDischargePlot)
 
-EnoDischargets <- EnoDischarge %>%
-  mutate(Year = year(Date), 
-         Month = month(Date),
-         Day = day(Date)) %>%
-  group_by(Year, Month, Day)
+library(zoo)
+z <- zooreg(EnoDischarge, start = as.Date("1963-09-01"))
+# remove Feb 29's
+zz <- z[format(time(z), "%m %d") != "02 29"]
+zzEnotimeseries <- ts(zz$Daily.Mean.Discharge, frequency = 365, 
+                        start = c(1963, 9, 1))
 
-Enotimeseries <- ts(EnoDischarge$Daily.Mean.Discharge, frequency = 366, 
-                        start = c(1963, 9, 1), end = c(2019, 11, 5))
+Enotimeseriesstl <- stl(Enotimeseries, s.window='periodic')
+
+plot(Enotimeseriesstl)
 ```
 
 10. How do the seasonal and trend components of the decomposition compare to the Clear Creek discharge dataset? Are they similar in magnitude?
