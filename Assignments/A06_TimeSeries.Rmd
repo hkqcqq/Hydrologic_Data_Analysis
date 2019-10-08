@@ -65,11 +65,12 @@ EnoDischargePlot <-
   labs(y = expression("Daily Mean Discharge (ft"^3*"/s)"))
 print(EnoDischargePlot)
 
+#install.packages("zoo")
 library(zoo)
 z <- zooreg(EnoDischarge, start = as.Date("1963-09-01"))
 # remove Feb 29's
 zz <- z[format(time(z), "%m %d") != "02 29"]
-zzEnotimeseries <- ts(zz$Daily.Mean.Discharge, frequency = 365, 
+Enotimeseries <- ts(zz$Daily.Mean.Discharge, frequency = 365, 
                         start = c(1963, 9, 1))
 
 Enotimeseriesstl <- stl(Enotimeseries, s.window='periodic')
@@ -79,9 +80,9 @@ plot(Enotimeseriesstl)
 
 10. How do the seasonal and trend components of the decomposition compare to the Clear Creek discharge dataset? Are they similar in magnitude?
 
-> Seasonal: 
+> Seasonal: The seasonal component of the decomposition of the Eno River discharge dataset is not as smooth as that of the Clear Creek discharge. But they are both periodic. The peaks of discharge both occur in summer. However they are not similar in magnitude. The peak of discharge of the Clear Creek is much greater than that of the Eno River.
 
-> Trend: 
+> Trend: The trend component of the decomposition of the Eno River discharge dataset is more volatile than that of the Clear Creek discharge. However, the magnitude of the trend of the Eno River discharge is smaller than that of the Clear Creek discharge.
 
 ## Trend Analysis
 Research question: Has there been a monotonic trend in discharge in Clear Creek over the period of study?
@@ -89,30 +90,39 @@ Research question: Has there been a monotonic trend in discharge in Clear Creek 
 11. Generate a time series of monthly discharge in Clear Creek from the ClearCreekDischarge.Monthly data frame. This time series should include just one column (discharge). 
 12. Run a Seasonal Mann-Kendall test on the monthly discharge data. Inspect the overall trend and the monthly trends. 
 ```{r}
+ClearCreek_ts <- ts(ClearCreekDischarge.Monthly[[3]], frequency = 12)
+ClearCreektimeseriesstl <- stl(ClearCreek_ts, s.window='periodic')
+plot(ClearCreektimeseriesstl)
 
+# Run SMK test
+ClearCreektrend <- smk.test(ClearCreek_ts)
+
+# Inspect results
+ClearCreektrend
+summary(ClearCreektrend)
 ```
 
 13. Is there an overall monotonic trend in discharge over time? If so, is it positive or negative?
 
-> 
+> No, there is not an overall monotonic trend in discharge over time.
 
 14. Are there any monthly monotonic trends in discharge over time? If so, during which months do they occur and are they positive or negative?
 
-> 
+> Yes, positive trend occurs during June and July.
 
 ## Reflection
 15. What are 2-3 conclusions or summary points about time series you learned through your analysis?
 
->
+> Time series analysis is very useful in analyzing the trend of variables of rivers or lakes. In addition, we can use the time series model to forecast the conditions in the future. However, the dataset is often discontinuous. Therefore, we should use different types of interpolation to make it continuous. 
 
-16. What data, visualizations, and/or models supported your conclusions from 12?
+16. What data, visualizations, and/or models supported your conclusions from 15?
 
-> 
+> Data used includes discharge data from Clear Creek in Colorado, USA, total phosphorus data from Lake Mendota. Ggplot, acf, pacf, stl function, ARMA models are used to draw those conclusions.
 
 17. Did hands-on data analysis impact your learning about time series relative to a theory-based lesson? If so, how?
 
->
+> Yes. Hands-on data analysis convinced me that time series analysis is very useful in the research of rivers or lakes. Also it can help me understand the theory and master some useful tools of time series analysis better.
 
 18.	How did the real-world data compare with your expectations from theory?
 
->
+>There are quite big differences. Real-world data is not perfect. It can have some gaps and not continuous, which is a challenge for time series analysis. But in general, real-world data has a theoretical law.
