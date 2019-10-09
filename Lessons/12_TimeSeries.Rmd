@@ -153,6 +153,12 @@ Mendotatrend <- smk.test(Mendotatimeseries)
 # Inspect results
 Mendotatrend
 summary(Mendotatrend)
+
+ClearCreekDischarge.Monthly <- linearinterpolation %>%
+  mutate(Year = year(Date), 
+         Month = month(Date)) %>%
+  group_by(Year, Month) %>%
+  summarise(TP = mean(TP))
 ```
 
 What would we conclude based on these findings? Describe as you would to an educated but non-specialist audience.

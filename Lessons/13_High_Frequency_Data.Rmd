@@ -17,13 +17,15 @@ editor_options:
 
 High frequency data is usually defined as frequencies significantly lower than daily (e.g. 5-minute, 15-minute, 1 hr etc). What types of hydrological and biological processes happen on this timescale that we might want to investigate?
 
->
+> Temperature, dissolved oxygen, fast storms/ flash floods, contaminents
 
 
 ## Session Set Up
 
 ```{r, message = FALSE}
 getwd()
+
+install.packages("EcoHydRology")
 
 packages <- c(
   "dataRetrieval", "tidyverse", "cowplot", "EcoHydRology", "xts", "dygraphs"
@@ -37,7 +39,7 @@ theme_set(theme_classic(base_size = 12))
 
 ```{r download data}
 
-dischargedatTFC2018 <- readNWISuv(
+dischargedatTFC2018 <- readNWISuv( #uv: instant values
   site = "02097280", #Third Fork Creek at Woodcroft Parkway Near Blands
   parameterCd = "00060",
   startDate = "2018-01-01", 
@@ -66,13 +68,12 @@ plot_grid(
     ggtitle("Ellerbe Creek"),
   ncol = 1
 )
-          
 
 ```
 
 The shape and size of river hydrographs following rain events can tell us how water moves through a watershed. Once rain falls, how does water get to a stream? What would the streamflow do?
 
->
+> overland flow, groundwater, fall in the river channel
 
 
 _"Hydrograph separation is one of the most desperate analysis techniques in use in hydrology" - Hewlett & Hibbert 1967_
@@ -114,11 +115,46 @@ Export <- TFC2018 %>%
 
 What percentage of water is exported from this watershed as baseflow? What percentage as quickflow?
 
-> 
+> 51.9% baseflow
+  48.1% quickflow
 
 Repeat this analysis for Ellerbe Creek. How do the percentages compare?
 
->
+```{r}
+ECbaseflow <- BaseflowSeparation(
+  dischargedatEC2018$Flow_Inst, 
+  filter_parameter = 0.925, 
+  passes = 3
+  )
+
+EC2018 <- cbind(dischargedatEC2018, ECbaseflow)
+
+ggplot(EC2018, aes(x = dateTime, y = Flow_Inst)) + 
+  geom_line() +
+  # scale_y_log10() +
+  geom_line(mapping = aes(x = dateTime, y = bt), color = "darkorange4") +
+  geom_line(mapping = aes(x = dateTime, y = qft), color = "steelblue4")
+
+dygraph(
+  cbind(
+    Flow = with(EC2018, xts(Flow_Inst, order.by = dateTime)), 
+    Baseflow = with(EC2018, xts(bt, order.by = dateTime)), 
+    Quickflow = with(EC2018, xts(qft, order.by = dateTime))
+    )
+  ) %>% 
+  dyRangeSelector()
+
+ExportEC <- EC2018 %>%
+  mutate(timestep = c(diff(as.numeric(dateTime)), NA_real_),
+         baseflowexport = bt * timestep,
+         quickflowexport = qft * timestep) %>%
+  summarize(BaseflowExport_cf = sum(baseflowexport, na.rm = T),
+            QuickflowExport_cf = sum(quickflowexport, na.rm = T),
+            TotalExport_cf = BaseflowExport_cf + QuickflowExport_cf)
+```
+
+> 43.4% baseflow
+  56.6% quickflow
 
 What does this mean physically about the watershed?
 
@@ -130,11 +166,11 @@ A "flashy" stream increases in flow faster following a precipitation event.
 
 Refering to our previous work with baseflow separation, would you expect flashiness to increase or decrease with urbanization?
 
-> 
+> increase
 
 What do you think "urban stream syndrom" refers to?
 
->
+> stream channel will be deeper
 
 The Richards-Baker Index is an index of how flashy a stream is. It is calculated as $$RBI = (\sum_{j = 1}^n |Q_j - Q_{j-1}| / \sum_{j = 1}^n Q_j) / Catchment Area$$
 
@@ -154,12 +190,11 @@ RBI_EC2018 <- (
   sum(abs(diff(dischargedatEC2018$Flow_Inst))) / 
     sum(dischargedatEC2018$Flow_Inst[-1])
   ) / EC.catchment.size
-
 ```
 
 Which stream is flashier?
 
->
+> Ellerbe Creek
 
 ## Chemical Flashiness
 
@@ -252,3 +287,16 @@ What hydrological processes did we investigate today?
 What can high-frequency data be used for that daily data may not be able to capture?
 
 > 
+```{r}
+sites <- whatNWISsites(parameterCD = "00060", statecd = "NC")
+
+dischargedatTFC2018 <- readNWISuv(
+  site = "03517000",
+  parameterCd = "00060",
+  startDate = "2018-01-01", 
+  endDate = "2019-01-01"
+  ) %>% 
+  renameNWISColumns()
+
+```
+
