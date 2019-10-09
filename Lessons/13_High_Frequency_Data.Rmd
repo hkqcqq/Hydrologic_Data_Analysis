@@ -1,0 +1,254 @@
+---
+title: "13: High Frequency Data"
+author: "Hydrologic Data Analysis | Cathy Chamberlin"
+date: "Fall 2019"
+output: html_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## Lesson Objectives
+1. Determine stormflow and baseflow from high frequency flow data
+2. Use a hysteresis plot to understand watershed dynamics
+3. Communicate findings with peers through oral, visual, and written modes
+
+## Opening Discussion
+
+High frequency data is usually defined as frequencies significantly lower than daily (e.g. 5-minute, 15-minute, 1 hr etc). What types of hydrological and biological processes happen on this timescale that we might want to investigate?
+
+>
+
+
+## Session Set Up
+
+```{r, message = FALSE}
+getwd()
+
+packages <- c(
+  "dataRetrieval", "tidyverse", "cowplot", "EcoHydRology", "xts", "dygraphs"
+  )
+invisible(lapply(packages, library, character.only = TRUE)) 
+
+theme_set(theme_classic(base_size = 12))
+```
+
+## Pull Data
+
+```{r download data}
+
+dischargedatTFC2018 <- readNWISuv(
+  site = "02097280", #Third Fork Creek at Woodcroft Parkway Near Blands
+  parameterCd = "00060",
+  startDate = "2018-01-01", 
+  endDate = "2019-01-01"
+  ) %>% 
+  renameNWISColumns()
+
+
+dischargedatEC2018 <- readNWISuv(
+  site = "0208675010", #Ellerbe Creek at Club Boulevard at Durham, NC
+  parameterCd = "00060", 
+  startDate = "2018-01-01", 
+  endDate = "2019-01-01"
+  ) %>% 
+  renameNWISColumns()
+
+
+plot_grid(
+  ggplot(dischargedatTFC2018, aes(x = dateTime, y = Flow_Inst)) +
+    geom_line() + 
+    scale_y_log10() +
+    ggtitle("Third Fork Creek"),
+  ggplot(dischargedatEC2018, aes(x = dateTime, y = Flow_Inst)) + 
+    geom_line() + 
+    scale_y_log10() +
+    ggtitle("Ellerbe Creek"),
+  ncol = 1
+)
+          
+
+```
+
+The shape and size of river hydrographs following rain events can tell us how water moves through a watershed. Once rain falls, how does water get to a stream? What would the streamflow do?
+
+>
+
+
+_"Hydrograph separation is one of the most desperate analysis techniques in use in hydrology" - Hewlett & Hibbert 1967_
+
+
+```{r baseflowseparation}
+TFCbaseflow <- BaseflowSeparation(
+  dischargedatTFC2018$Flow_Inst, 
+  filter_parameter = 0.925, 
+  passes = 3
+  )
+
+TFC2018 <- cbind(dischargedatTFC2018, TFCbaseflow)
+
+ggplot(TFC2018, aes(x = dateTime, y = Flow_Inst)) + 
+  geom_line() +
+  # scale_y_log10() +
+  geom_line(mapping = aes(x = dateTime, y = bt), color = "darkorange4") +
+  geom_line(mapping = aes(x = dateTime, y = qft), color = "steelblue4")
+
+dygraph(
+  cbind(
+    Flow = with(TFC2018, xts(Flow_Inst, order.by = dateTime)), 
+    Baseflow = with(TFC2018, xts(bt, order.by = dateTime)), 
+    Quickflow = with(TFC2018, xts(qft, order.by = dateTime))
+    )
+  ) %>% 
+  dyRangeSelector()
+
+Export <- TFC2018 %>%
+  mutate(timestep = c(diff(as.numeric(dateTime)), NA_real_),
+         baseflowexport = bt * timestep,
+         quickflowexport = qft * timestep) %>%
+  summarize(BaseflowExport_cf = sum(baseflowexport, na.rm = T),
+            QuickflowExport_cf = sum(quickflowexport, na.rm = T),
+            TotalExport_cf = BaseflowExport_cf + QuickflowExport_cf)
+  
+```
+
+What percentage of water is exported from this watershed as baseflow? What percentage as quickflow?
+
+> 
+
+Repeat this analysis for Ellerbe Creek. How do the percentages compare?
+
+>
+
+What does this mean physically about the watershed?
+
+>
+
+## Hydrologic Flashiness
+
+A "flashy" stream increases in flow faster following a precipitation event. 
+
+Refering to our previous work with baseflow separation, would you expect flashiness to increase or decrease with urbanization?
+
+> 
+
+What do you think "urban stream syndrom" refers to?
+
+>
+
+The Richards-Baker Index is an index of how flashy a stream is. It is calculated as $$RBI = (\sum_{j = 1}^n |Q_j - Q_{j-1}| / \sum_{j = 1}^n Q_j) / Catchment Area$$
+
+```{r Flashiness}
+TFCsitedata <- readNWISsite(site = "02097280")
+TFC.catchment.size <- TFCsitedata$drain_area_va #square miles
+
+RBI_TFC2018 <- (
+  sum(abs(diff(dischargedatTFC2018$Flow_Inst))) / 
+    sum(dischargedatTFC2018$Flow_Inst[-1])
+  ) / TFC.catchment.size
+
+ECsitedata <- readNWISsite(site = "0208675010")
+EC.catchment.size <- ECsitedata$drain_area_va #square miles
+
+RBI_EC2018 <- (
+  sum(abs(diff(dischargedatEC2018$Flow_Inst))) / 
+    sum(dischargedatEC2018$Flow_Inst[-1])
+  ) / EC.catchment.size
+
+```
+
+Which stream is flashier?
+
+>
+
+## Chemical Flashiness
+
+Chemical concentrations in rivers can be either highly variable with discharge, or "chemostatic", which means the concentration barely changes with discharge. 
+
+```{r}
+CCdat <- readNWISuv(
+  site = "02249500", # CRANE CREEK AT MELBOURNE, FL
+  parameterCd = c("00060", "99133"), # Discharge in cfs & Nitrate in mg/l NO3-N
+  startDate = "2015-01-1",
+  endDate = "2016-01-01"
+  ) %>%
+  renameNWISColumns() %>%
+  rename(Nitrate_mgl = 6)
+
+ggplot(CCdat,
+       aes(x = Flow_Inst, y = Nitrate_mgl)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+
+
+Potdat <- readNWISuv(
+  site = "01646500", # POTOMAC RIVER NEAR WASH, DC LITTLE FALLS PUMP STA
+  parameterCd = c("00060", "99133"), # Discharge in cfs & Nitrate in mg/l NO3-N
+  startDate = "2016-01-1",
+  endDate = "2017-01-01"
+  ) %>% 
+  renameNWISColumns() %>%
+  rename(Nitrate_mgl = 6)
+
+ggplot(Potdat,
+       aes(x = Flow_Inst, y = Nitrate_mgl)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+```
+
+Which of these rivers is more chemostatic?
+
+>
+
+## Hysteresis Loops
+
+Hysteresis occurs when the concentration varies with discharge in a different relationship on the rising and falling limbs of a storm. This can be caused by _flushing_ behavior or _dilution_ behavior. 
+
+```{r}
+dygraph(
+  cbind(
+    Flow = xts(Potdat$Flow_Inst, order.by = Potdat$dateTime), 
+    Nitrate = xts(Potdat$Nitrate_mgl, order.by = Potdat$dateTime)
+    )
+  ) %>% 
+  dySeries("Nitrate", axis = "y2") %>%
+  dyRangeSelector()
+```
+
+Look at the storm that occured around February 1st. Do you expect this storm to be a flushing or a diluting storm?
+
+>
+
+```{r}
+PotomacStorm <- Potdat %>%
+  filter(dateTime > "2016-01-31" & dateTime < "2016-02-14") 
+
+ggplot(PotomacStorm, aes(x = Flow_Inst, y = Nitrate_mgl, color = dateTime)) +
+  geom_point() 
+
+
+```
+
+Did this storm exhibit clockwise or counterclockwise hysteresis?
+
+>
+
+Which direction do hysteresis loops go for diluting storms?
+
+>
+
+Which direction do hysteresis loops go for flushing storms?
+
+>
+
+## Closing Discussion
+
+What hydrological processes did we investigate today? 
+
+>
+
+What can high-frequency data be used for that daily data may not be able to capture?
+
+> 
