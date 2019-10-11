@@ -31,7 +31,8 @@ library(tseries)
 
 theme_set(theme_classic())
 
-LAGOSdata <- lagosne_load()
+#LAGOSdata <- lagosne_load()
+load(file = "./Data/Raw/LAGOSdata.rda")
 ```
 
 ## Trend analysis
@@ -132,7 +133,7 @@ Common interpolation methods:
 Linear interpolation is most common for water quality data, and fits with our understanding about how TP might change over time in this system. 
 ```{r}
 # Generate monthly values from July 1988 to August 2013
-linearinterpolation <- as.data.frame(approx(Mendotadata, n = 303, method = "linear")) #30 days a month
+linearinterpolation <- as.data.frame(approx(Mendotadata, n = 500, method = "linear")) #30 days a month
 linearinterpolation$x <- as.Date(linearinterpolation$x, origin = "1970-01-01")
 names(linearinterpolation) <- c("Date", "TP")
 
@@ -144,8 +145,14 @@ ggplot(Mendotadata, aes(x = sampledate, y = tp)) +
   geom_point(data = linearinterpolation, aes(x = Date, y = TP), color = "#c13d75ff") 
 print(MendotaTPinterpolated)
 
+Mendotadatats <- linearinterpolation %>%
+  mutate(Year = year(Date), 
+         Month = month(Date)) %>%
+  group_by(Year, Month) %>%
+  summarise(TP = mean(TP))
+
 # Generate time series (smk.test needs ts, not data.frame)
-Mendotatimeseries <- ts(linearinterpolation$TP, frequency = 12, 
+Mendotatimeseries <- ts(Mendotadatats$TP, frequency = 12, 
                         start = c(1988, 7, 5), end = c(2013, 8, 5))
 # Run SMK test
 Mendotatrend <- smk.test(Mendotatimeseries)
@@ -154,11 +161,6 @@ Mendotatrend <- smk.test(Mendotatimeseries)
 Mendotatrend
 summary(Mendotatrend)
 
-Mendotatimeseries <- linearinterpolation %>%
-  mutate(Year = year(Date), 
-         Month = month(Date)) %>%
-  group_by(Year, Month) %>%
-  summarise(TP = mean(TP))
 ```
 
 What would we conclude based on these findings? Describe as you would to an educated but non-specialist audience.

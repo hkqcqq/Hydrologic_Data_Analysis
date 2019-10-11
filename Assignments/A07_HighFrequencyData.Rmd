@@ -1,6 +1,6 @@
 ---
 title: "Assignment 7: High Frequency Data"
-author: "Student Name"
+author: "Keqi He"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -28,7 +28,28 @@ The completed exercise is due on 16 October 2019 at 9:00 am.
 
 
 ```{r setup}
+getwd()
 
+# install.packages("tidyverse")
+# install.packages("streamMetabolizer", dependencies = TRUE,
+                 repos = c("https://owi.usgs.gov/R", "http://cran.rstudio.com")
+                 )
+
+# library(devtools)
+# install_github('streampulse/StreamPULSE')
+
+packages <- c(
+  "tidyverse", 
+  "StreamPULSE", 
+  "streamMetabolizer"
+  )
+invisible(
+  suppressPackageStartupMessages(
+    lapply(packages, library, character.only = TRUE)
+    )
+  ) 
+
+theme_set(theme_classic())
 ```
 
 
@@ -36,23 +57,66 @@ The completed exercise is due on 16 October 2019 at 9:00 am.
 
 5. Reformat the data into one dataframe with columns DateTime_UTC, DateTime_Solar (using `convert_UTC_to_solartime()`), SiteName, DO_mgL, Discharge_m3s, and Nitrate_mgL.
 ```{r Datadownload}
+Kandischarge <- request_data(
+  sitecode = "KS_KANSASR",
+  variables = c('Discharge_m3s')
+  )
+KanDO <- request_data(
+  sitecode = "KS_KANSASR",
+  variables = c('DO_mgl')
+  )
+Kannitrate <- request_data(
+  sitecode = "KS_KANSASR",
+  variables = c('Nitrate_mgL')
+  )
 
+Kandischargedat <- Kandischarge[[1]] %>%
+  spread(value = value, key = variable)
+KanDOdat <- KanDO[[1]] %>%
+  spread(value = value, key = variable)
+Kannitratedat <- Kannitrate[[1]] %>%
+  spread(value = value, key = variable)
 
+Kan.lon <- KanDO[[2]]$lon
+
+Kandat1 <- left_join(Kannitratedat, Kandischargedat, by = "DateTime_UTC")
+Kandat <- left_join(Kandat1, KanDOdat, by = "DateTime_UTC") %>%
+  select(DateTime_UTC, site.x, DO_mgL, Discharge_m3s, Nitrate_mgL) %>%
+  mutate(DateTime_Solar = convert_UTC_to_solartime(DateTime_UTC, Kan.lon))
+names(Kandat)[2] <- c("Sitename")
 ```
 
 6. Plot each of the 3 variables against solar time for the period of record
 
 ```{r}
+KanDischargeplot <- ggplot(Kandat,
+       aes(x = DateTime_Solar, y = Discharge_m3s)) +
+  geom_point() +
+  labs(x = "Date Time (Solar)", y = expression("Discharge (m"^3*"/s)")) 
+print(KanDischargeplot)
 
+KanDOplot <- ggplot(Kandat,
+       aes(x = DateTime_Solar, y = DO_mgL)) +
+  geom_point() +
+  xlab("Date Time (Solar)") +
+  ylab("Dissolved Oxygen (mg/L)")
+print(KanDOplot)
+
+KanNitrateplot <- ggplot(Kandat,
+       aes(x = DateTime_Solar, y = Nitrate_mgL)) +
+  geom_point() +
+  xlab("Date Time (Solar)") +
+  ylab("Nitrate Concentration (mg/L)")
+print(KanNitrateplot)
 ```
 
 7. How will you address gaps in these dataseries?
 
->
+> I will interpolate the data to generate the continuous data, such as piecewise constant interpolation, linear interpolation and spline interpolation.
 
 8. How does the daily amplitude of oxygen concentration swings change over the season? What might cause this?
 
->
+> The daily amplitude of oxygen concentration swings in winter is small, while it is bigger in spring. In summer, the daily amplitude of oxygen concentration swings is much bigger. Because the temperature rises from winter to summer, the solubility of oxygen in water decreases with increasing temperature, while the intensity of photosynthesis increases with increasing temperature. Therefore, the daily amplitude of oxygen concentration swings is bigger with higher temperature.
 
 ## Baseflow separation
 9. Use the `EcoHydRology::BaseflowSeparation()` function to partition discharge into baseflow and quickflow, and calculate how much water was exported as baseflow and quickflow for this time period. Use the DateTime_UTC column as your timestamps in this analysis.
@@ -63,17 +127,38 @@ The `package::function()` notation being asked here is a way to call a function 
 
 
 ```{r}
+Kanbaseflow <- EcoHydRology::BaseflowSeparation(
+  Kandischargedat$Discharge_m3s, 
+  filter_parameter = 0.925, 
+  passes = 3
+  )
 
+Kan2018 <- cbind(Kandischargedat, Kanbaseflow)
+
+Export <- Kan2018 %>%
+  mutate(timestep = c(diff(as.numeric(DateTime_UTC)), NA_real_),
+         baseflowexport = bt * timestep,
+         quickflowexport = qft * timestep) %>%
+  summarize(BaseflowExport_KAN = sum(baseflowexport, na.rm = T),
+            QuickflowExport_KAN = sum(quickflowexport, na.rm = T),
+            TotalExport_KAN = BaseflowExport_KAN + QuickflowExport_KAN)
+
+Kanplot <- ggplot(Kan2018, aes(x = DateTime_UTC, y = Discharge_m3s)) + 
+  geom_line() +
+  geom_line(mapping = aes(x = DateTime_UTC, y = bt), color = "darkorange4") +
+  geom_line(mapping = aes(x = DateTime_UTC, y = qft), color = "steelblue4") +
+  labs(x = "Date Time (UTC)", y = expression("Discharge (m"^3*"/s)")) 
+print(Kanplot)
 ```
 
 
 11. What percentage of total water exported left as baseflow and quickflow from the Kansas River over this time period?
 
->
+> baseflow: 95.68%; quickflow: 4.32%
 
 12. This is a much larger river and watershed than the 2 we investigated in class. How does the size of the watershed impact how flow is partitioned into quickflow and baseflow? 
 
->
+> 
 
 13. The site we are looking at is also further down in its river network (i.e. instead of being a headwater stream, this river has multiple tributaries that flow into it). How does this impact your interpretation of your results?
 
@@ -84,7 +169,14 @@ The `package::function()` notation being asked here is a way to call a function 
 14. Create a ggplot of flow vs. nitrate for the large storm in May (~May 1 - May 20). Use color to represent Date and Time.
 
 ```{r}
+KanStorm <- Kandat %>%
+  filter(DateTime_Solar > "2018-04-30" & DateTime_Solar < "2018-05-21") 
 
+KanNitrateDis <- ggplot(KanStorm,
+       aes(x = Discharge_m3s, y = Nitrate_mgL, color = DateTime_Solar)) +
+  labs(x = expression("Discharge (m"^3*"/s)"), y = "Nitrate (mg/L)") +
+  geom_point()
+print(KanNitrateDis)
 ```
 
 15. Does this storm show clockwise or counterclockwise hysteresis? Was this storm a flushing or diluting storm?
