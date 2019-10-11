@@ -25,8 +25,12 @@ Wednesday we used high-frequency hydrographs to learn about how water flows thro
 ```{r, message = FALSE}
 getwd()
 
-# install.packages("StreamPULSE")
-# install.packages("streamMetabolizer")
+install.packages("streamMetabolizer", dependencies = TRUE,
+                 repos = c("https://owi.usgs.gov/R", "http://cran.rstudio.com")
+                 )
+
+library(devtools)
+install_github('streampulse/StreamPULSE')
 
 packages <- c(
   "dataRetrieval", 
@@ -65,7 +69,7 @@ ggplot(CCdat,
        aes(x = Flow_Inst, y = Nitrate_mgl)) +
   geom_point() +
   scale_x_log10() +
-  scale_y_log10()
+  scale_y_log10()    #C-Q plot
 
 
 Potdat <- readNWISuv(
@@ -86,7 +90,8 @@ ggplot(Potdat,
 
 Which of these rivers is more chemostatic?
 
->
+> CRANE CREEK AT MELBOURNE, FL
+chemostatic: concentraction does not change with discharge
 
 ## Hysteresis Loops
 
@@ -105,7 +110,7 @@ dygraph(
 
 Look at the storm that occured around February 1st. Do you expect this storm to be a flushing or a diluting storm?
 
->
+> decreases; diluting strom
 
 ```{r}
 PotomacStorm <- Potdat %>%
@@ -114,30 +119,30 @@ PotomacStorm <- Potdat %>%
 ggplot(PotomacStorm, aes(x = Flow_Inst, y = Nitrate_mgl, color = dateTime)) +
   geom_point() 
 
-
 ```
 
 Did this storm exhibit clockwise or counterclockwise hysteresis?
 
->
+> counterclockwise
 
 Which direction do hysteresis loops slope for diluting storms?
 
->
+> down
 
 Which direction do hysteresis loops go for flushing storms?
 
->
+> up
 
 ## Using dissolved oxygen to estimate metabolism
 
 What is "ecosystem metabolism"?
 
->
+> produce and consume
 
 Why would we want to know the *GPP* and *ER* of a river reach?
 
->
+> GPP: gross primary production
+  EP: ecosystem respiration
 
 
 The StreamPulse project is a group of researchers around the world who are measuring oxygen concentrations in streams to determine the GPP and ER of many different types of streams and rivers from around the globe. We will be using data from their website for this class period. This project uses the R package `streamMetabolizer` to compute its estimates of metabolism and allows data download from its site using the `StreamPULSE` R package.
@@ -169,7 +174,7 @@ $\frac{dO_2}{dt} = P_t + R_t + D_t$
 
 What are P~t~, R~t~ and D~t~? What are these parameters functions of?
 
->
+> production; respriation; diffsion
 
 
 Visit https://data.streampulse.org/ 

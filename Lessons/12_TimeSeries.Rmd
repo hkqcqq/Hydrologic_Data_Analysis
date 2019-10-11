@@ -154,7 +154,7 @@ Mendotatrend <- smk.test(Mendotatimeseries)
 Mendotatrend
 summary(Mendotatrend)
 
-ClearCreekDischarge.Monthly <- linearinterpolation %>%
+Mendotatimeseries <- linearinterpolation %>%
   mutate(Year = year(Date), 
          Month = month(Date)) %>%
   group_by(Year, Month) %>%
