@@ -1,0 +1,113 @@
+---
+title: "Assignment 7: High Frequency Data"
+author: "Student Name"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## OVERVIEW
+
+This exercise accompanies the lessons in Hydrologic Data Analysis on high frequency data
+
+## Directions
+1. Change "Student Name" on line 3 (above) with your name.
+2. Work through the steps, **creating code and output** that fulfill each instruction.
+3. Be sure to **answer the questions** in this assignment document.
+4. When you have completed the assignment, **Knit** the text and code into a single pdf file.
+5. After Knitting, submit the completed exercise (pdf file) to the dropbox in Sakai. Add your last name into the file name (e.g., "A07_Chamberlin.pdf") prior to submission.
+
+The completed exercise is due on 16 October 2019 at 9:00 am.
+
+## Setup
+
+1. Verify your working directory is set to the R project file, 
+2. Load the StreamPULSE, streamMetabolizer and tidyverse packages. 
+3. Set your ggplot theme (can be theme_classic or something else)
+
+
+```{r setup}
+
+```
+
+
+4. Download data from the Stream Pulse portal using `request_data()` for the Kansas River, ("KS_KANSASR"). Download the discharge (`Discharge_m3s`), disolved oxygen (`DO_mgL`) and nitrate data (`Nitrate_mgL`) for the entire period of record
+
+5. Reformat the data into one dataframe with columns DateTime_UTC, DateTime_Solar (using `convert_UTC_to_solartime()`), SiteName, DO_mgL, Discharge_m3s, and Nitrate_mgL.
+```{r Datadownload}
+
+
+```
+
+6. Plot each of the 3 variables against solar time for the period of record
+
+```{r}
+
+```
+
+7. How will you address gaps in these dataseries?
+
+>
+
+8. How does the daily amplitude of oxygen concentration swings change over the season? What might cause this?
+
+>
+
+## Baseflow separation
+9. Use the `EcoHydRology::BaseflowSeparation()` function to partition discharge into baseflow and quickflow, and calculate how much water was exported as baseflow and quickflow for this time period. Use the DateTime_UTC column as your timestamps in this analysis.
+
+The `package::function()` notation being asked here is a way to call a function without loading the library. Sometimes the EcoHydRology package can mask tidyverse functions like pipes, which will cause problems for knitting. In your script, instead of just typing `BaseflowSeparation()`, you will need to include the package and two colons as well.
+
+10. Create a ggplot showing total flow, baseflow, and quickflow together. 
+
+
+```{r}
+
+```
+
+
+11. What percentage of total water exported left as baseflow and quickflow from the Kansas River over this time period?
+
+>
+
+12. This is a much larger river and watershed than the 2 we investigated in class. How does the size of the watershed impact how flow is partitioned into quickflow and baseflow? 
+
+>
+
+13. The site we are looking at is also further down in its river network (i.e. instead of being a headwater stream, this river has multiple tributaries that flow into it). How does this impact your interpretation of your results?
+
+>
+
+## Chemical Hysteresis
+
+14. Create a ggplot of flow vs. nitrate for the large storm in May (~May 1 - May 20). Use color to represent Date and Time.
+
+```{r}
+
+```
+
+15. Does this storm show clockwise or counterclockwise hysteresis? Was this storm a flushing or diluting storm?
+
+>
+
+16. What does this mean for how nitrate gets into the river from the watershed?
+
+>
+
+## Reflection
+17. What are 2-3 conclusions or summary points about high frequency data you learned through your analysis?
+
+>
+
+18. What data, visualizations, and/or models supported your conclusions from 17?
+
+> 
+
+19. Did hands-on data analysis impact your learning about high frequency data relative to a theory-based lesson? If so, how?
+
+>
+
+20.	How did the real-world data compare with your expectations from theory?
+
+>

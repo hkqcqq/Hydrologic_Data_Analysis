@@ -1,0 +1,232 @@
+---
+title: "14: High Frequency Data"
+author: "Hydrologic Data Analysis | Cathy Chamberlin"
+date: "Fall 2019"
+output: html_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## Lesson Objectives
+1. Use a hysteresis plot to understand watershed dynamics
+2. Use the StreamPulse data portal to investigate stream metabolism
+3. Communicate findings with peers through oral, visual, and written modes
+
+## Opening Discussion
+
+Wednesday we used high-frequency hydrographs to learn about how water flows through watersheds to get to streams. How do you think water chemistry is impacted by the ways water flows through a watershed?
+
+>
+
+
+## Session Set Up
+
+```{r, message = FALSE}
+getwd()
+
+# install.packages("StreamPULSE")
+# install.packages("streamMetabolizer")
+
+packages <- c(
+  "dataRetrieval", 
+  "tidyverse", 
+  "xts",
+  "dygraphs",
+  "StreamPULSE", 
+  "streamMetabolizer"
+  )
+invisible(
+  suppressPackageStartupMessages(
+    lapply(packages, library, character.only = TRUE)
+    )
+  ) 
+
+theme_set(theme_classic(base_size = 12))
+```
+
+
+
+## Chemical Flashiness
+
+Chemical concentrations in rivers can be either highly variable with discharge, or "chemostatic", which means the concentration barely changes with discharge. 
+
+```{r}
+CCdat <- readNWISuv(
+  site = "02249500", # CRANE CREEK AT MELBOURNE, FL
+  parameterCd = c("00060", "99133"), # Discharge in cfs & Nitrate in mg/l NO3-N
+  startDate = "2015-01-1",
+  endDate = "2016-01-01"
+  ) %>%
+  renameNWISColumns() %>%
+  rename(Nitrate_mgl = 6)
+
+ggplot(CCdat,
+       aes(x = Flow_Inst, y = Nitrate_mgl)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+
+
+Potdat <- readNWISuv(
+  site = "01646500", # POTOMAC RIVER NEAR WASH, DC LITTLE FALLS PUMP STA
+  parameterCd = c("00060", "99133"), # Discharge in cfs & Nitrate in mg/l NO3-N
+  startDate = "2016-01-1",
+  endDate = "2017-01-01"
+  ) %>% 
+  renameNWISColumns() %>%
+  rename(Nitrate_mgl = 6)
+
+ggplot(Potdat,
+       aes(x = Flow_Inst, y = Nitrate_mgl)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+```
+
+Which of these rivers is more chemostatic?
+
+>
+
+## Hysteresis Loops
+
+Hysteresis occurs when the concentration varies with discharge in a different relationship on the rising and falling limbs of a storm. This can be caused by _flushing_ behavior or _dilution_ behavior. 
+
+```{r}
+dygraph(
+  cbind(
+    Flow = xts(Potdat$Flow_Inst, order.by = Potdat$dateTime), 
+    Nitrate = xts(Potdat$Nitrate_mgl, order.by = Potdat$dateTime)
+    )
+  ) %>% 
+  dySeries("Nitrate", axis = "y2") %>%
+  dyRangeSelector()
+```
+
+Look at the storm that occured around February 1st. Do you expect this storm to be a flushing or a diluting storm?
+
+>
+
+```{r}
+PotomacStorm <- Potdat %>%
+  filter(dateTime > "2016-01-31" & dateTime < "2016-02-14") 
+
+ggplot(PotomacStorm, aes(x = Flow_Inst, y = Nitrate_mgl, color = dateTime)) +
+  geom_point() 
+
+
+```
+
+Did this storm exhibit clockwise or counterclockwise hysteresis?
+
+>
+
+Which direction do hysteresis loops slope for diluting storms?
+
+>
+
+Which direction do hysteresis loops go for flushing storms?
+
+>
+
+## Using dissolved oxygen to estimate metabolism
+
+What is "ecosystem metabolism"?
+
+>
+
+Why would we want to know the *GPP* and *ER* of a river reach?
+
+>
+
+
+The StreamPulse project is a group of researchers around the world who are measuring oxygen concentrations in streams to determine the GPP and ER of many different types of streams and rivers from around the globe. We will be using data from their website for this class period. This project uses the R package `streamMetabolizer` to compute its estimates of metabolism and allows data download from its site using the `StreamPULSE` R package.
+
+```{r}
+citation('streamMetabolizer')
+```
+
+```{r}
+Enodat <- request_data(
+  sitecode = "NC_Eno",
+  variables = c('DO_mgL'),
+  startdate = "2016-09-15", 
+  enddate = "2016-09-20"
+  )
+
+Eno.lon <- Enodat[[2]]$lon
+
+Eno.DO <- Enodat[[1]] %>%
+  spread(value = value, key = variable) %>%
+  mutate(DateTime_Solar = convert_UTC_to_solartime(DateTime_UTC, Eno.lon))
+
+ggplot(Eno.DO, aes(x = DateTime_Solar, y = DO_mgL)) + geom_line()
+```
+
+In a nutshell, the package uses a Bayesian statistical approach to fit the following model to the data: 
+
+$\frac{dO_2}{dt} = P_t + R_t + D_t$
+
+What are P~t~, R~t~ and D~t~? What are these parameters functions of?
+
+>
+
+
+Visit https://data.streampulse.org/ 
+
+
+First, skim the `Learn how` page on how to model stream metabolism. You don’t need to understand all of the technical language, but pay attention to all of the decisions that a researcher needs to make to find out if they can use this website/R packages to model metabolism in their stream reach. Not all methods will work everywhere, and this is a very important thing to keep in mind when doing any type of research. 
+
+What are the assumptions of the model?
+
+>
+
+Next, click on `Sitelist` in the upper navigation bar. 
+
+Where are there a lot of measurements? Where are there very few? Where are there none? What do you think this means for how we interpret the data? What do you think the sampling bias of this dataset might be, and how might that skew results?
+
+> 
+
+Now go to the `Visualize` page and select `Model results and diagnostics` then `O2 and Metabolism`. Choose a site that you want to investigate. You have the option of looking at different years and can zoom in on different parts of the years. Describe the data coming out of the site. 
+
+On the righthand site you will see a kernel density plot. A kernel density plot tells you which region of this plot most of the data points fall. It does this by using overall density. 25% shows you that 25% of all of the data points fall within the shaded region. 75% shows you where 75% of all of the data points fall, and because it includes more data points, it is a larger area. This type of plot can tell you how similar or different all of the data points are to each other. 
+
+Is GPP or ER greater? Does this change at different parts of the year or between years? What is the range of dissolved oxygen (DO) found in the site? 
+
+>
+
+For some sites you can overlay data about other factors over the DO data. Play around with that and see if you can find any relationships. 
+
+Is DO higher when it is warmer or colder? What happens after a flood (times when the depth and discharge increase abruptly)? What are the impacts of light (PAR = Photosynthetically Active Radiation)? 
+
+>
+
+
+Now, we will look at the distributions of GPP & ER from all the sites. Go back to `Visualize` in the upper navigation bar. Select `Compiled model results` then `Overall GPP vs. ER (kernel density)` from the upper bar. You will see a kernel density plot of all GPP and ER estimates from all days across all the sites in the data base. 
+
+Are most streams autotrophic or heterotrophic? Note that in this database, all GPP values are positive and all ER values are negative, but the magnitudes of the numbers are comparable.
+
+>
+
+You can use the slider on the left to select which DOY (Day of Year) range you want to look at. What do streams look like in spring, summer, autumn and fall? 
+
+>
+
+You can also select individual sites to overlay on top of the overall density. How is the stream you investigated earlier similar or different from the larger data set?
+
+>
+
+How are streams in North Carolina (site names all start with “NC_”) similar or different from the larger data set?
+
+>
+
+
+## Closing Discussion
+
+What hydrological biological processes that influence stream chemistry did we investigate today? 
+
+>
+
+What can high-frequency data be used for that daily data may not be able to capture?
+
+> 
