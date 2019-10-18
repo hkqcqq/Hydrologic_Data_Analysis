@@ -1,0 +1,119 @@
+---
+title: "16: Mapping"
+author: "Hydrologic Data Analysis | Kateri Salk"
+date: "Fall 2019"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## Lesson Objectives
+1. Discuss available datasets for watershed mapping
+2. Create maps of catchments and water features in R
+3. Analyze and communicate the findings of spatial analysis using mapping tools
+
+## Opening Discussion
+
+What are the big ideas from last class about mapping?
+
+## Session Set Up
+
+```{r, message = FALSE}
+getwd()
+
+library(tidyverse)
+library(sf)
+library(viridis)
+
+theme_set(theme_classic())
+```
+
+## Spatial datasets: line and polygon objects
+
+Today, we will be working with the USA rivers shape file (see metadata file in README folder) and the Watershed Boundary Dataset, accessed from USGS here: https://viewer.nationalmap.gov/basic/?basemap=b1&category=nhd&title=NHD%20View. We will be using the dataset for the HUC 2 designation 03, which represents the South Atlantic-Gulf region. Additional shapefiles for other regions are available at the link. 
+
+### Water features line objects
+```{r}
+waterfeatures <- st_read("../Data/Raw/hydrogl020.dbf")
+class(waterfeatures)
+
+# Filter for North Carolina
+waterfeatures <- filter(waterfeatures, STATE == "NC")
+
+# Remove a couple feature types we don't care about
+waterfeatures <- filter(waterfeatures, FEATURE != "Apparent Limit" & FEATURE != "Closure Line")
+```
+
+The .dbf file extension represents an ESRI shapefile. From the `st_read` function, we can see what the bounding box is around the spatial objects as well as the projection.
+
+```{r}
+Waterfeaturesplot <- 
+ggplot(waterfeatures) +
+  geom_sf(aes(fill = FEATURE, color = FEATURE)) +
+  scale_color_viridis_d(option = "magma", end = 0.9) +
+  scale_fill_viridis_d(option = "magma", end = 0.9)
+print(Waterfeaturesplot)
+
+```
+
+### Watershed boundary polygons
+
+We will upload the HUC6 watershed designations for North Carolina. Note that in the Watersheds_Spatial folder, there are many different shape file datasets going from HUC2 (largest) to HUC16 (smallest) and NWIS drainage lines. These are all downloaded as zip from the Watershed Boundary Dataset (WBD).
+```{r}
+HUC6 <- st_read("../Data/Raw/Watersheds_Spatial/WBDHU6.dbf")
+
+summary(HUC6$States)
+HUC6.NC <- HUC6 %>%
+  filter(States %in% c("GA,NC,SC", "NC", "NC,SC", "NC,SC,VA", "NC,VA"))
+
+
+```
+
+### Generating maps with mixed features
+
+Let's plot the watershed polygon features underneath the water features. Note that both datasets need to use the same projection in order to be plotted on the same ggplot. In more complex cases, you may want to set the proj4string components to be equal as well, and there is dummy code below (commented out) to show what that process looks like.
+
+Notice that we chose to use the ColorBrewer "paired" palette here (a true qualitative palette), as it would have been difficult to distinguish the continuous viridis color palettes across 10 watersheds.
+
+```{r}
+st_crs(waterfeatures)
+st_crs(HUC6.NC)
+waterfeatures <- st_set_crs(waterfeatures, 4269)
+st_crs(waterfeatures)
+
+#waterfeatures <- waterfeatures %>% st_set_crs(st_crs(HUC6.NC))
+
+NClayers <- ggplot() +
+  geom_sf(data = HUC6.NC, aes(fill = Name), color = "darkgray", alpha = 0.5) +
+  geom_sf(data = waterfeatures) +
+  scale_fill_brewer(palette = "Paired")
+print(NClayers)
+
+```
+
+Let's say we wanted to zoom in on the Neuse River basin. For today, we will place a bounding box on the map, but there are more complex ways to "clip" spatial dataests to only map onto specific boundaries. This can be particularly helpful when you are working with multiple spatial objects that do not have a common column from which to filter. 
+
+More information here: https://geocompr.robinlovelace.net/
+
+```{r}
+HUC6.Neuse <- filter(HUC6.NC, Name == "Neuse")
+
+Neusebasin <- ggplot() +
+  geom_sf(data = HUC6.Neuse, fill = "darkgray") +
+  geom_sf(data = waterfeatures, aes(fill = FEATURE, color = FEATURE)) +
+  xlim(c(-79.2, -75.9)) +
+  ylim(c(34.5, 36.5)) +
+  labs(title = "Neuse River Basin", color = "Feature", fill = "Feature") +
+  scale_color_viridis_d(option = "magma", end = 0.9) +
+  scale_fill_viridis_d(option = "magma", end = 0.9)
+print(Neusebasin)
+```
+
+What features are prevalent in the Neuse River basin? Where do certain features occur in the hydrologic network? How does this distribution compare to nearby basins?
+
+> 
+
+## Closing Discussion
+
+What could you do with the catchment and water features datasets as base layers for an analysis of physical or water quality data?
