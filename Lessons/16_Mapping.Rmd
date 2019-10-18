@@ -16,7 +16,7 @@ editor_options:
 ## Opening Discussion
 
 What are the big ideas from last class about mapping?
-
+projections, simple features
 ## Session Set Up
 
 ```{r, message = FALSE}
@@ -35,7 +35,7 @@ Today, we will be working with the USA rivers shape file (see metadata file in R
 
 ### Water features line objects
 ```{r}
-waterfeatures <- st_read("../Data/Raw/hydrogl020.dbf")
+waterfeatures <- st_read("./Data/Raw/hydrogl020.dbf")
 class(waterfeatures)
 
 # Filter for North Carolina
@@ -61,13 +61,11 @@ print(Waterfeaturesplot)
 
 We will upload the HUC6 watershed designations for North Carolina. Note that in the Watersheds_Spatial folder, there are many different shape file datasets going from HUC2 (largest) to HUC16 (smallest) and NWIS drainage lines. These are all downloaded as zip from the Watershed Boundary Dataset (WBD).
 ```{r}
-HUC6 <- st_read("../Data/Raw/Watersheds_Spatial/WBDHU6.dbf")
+HUC6 <- st_read("./Data/Raw/Watersheds_Spatial/WBDHU6.dbf")
 
 summary(HUC6$States)
 HUC6.NC <- HUC6 %>%
   filter(States %in% c("GA,NC,SC", "NC", "NC,SC", "NC,SC,VA", "NC,VA"))
-
-
 ```
 
 ### Generating maps with mixed features
@@ -112,7 +110,7 @@ print(Neusebasin)
 
 What features are prevalent in the Neuse River basin? Where do certain features occur in the hydrologic network? How does this distribution compare to nearby basins?
 
-> 
+> The stream in this basin is not connectted with others. 
 
 ## Closing Discussion
 

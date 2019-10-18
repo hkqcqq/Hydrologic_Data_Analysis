@@ -261,7 +261,7 @@ Secchi.Animation <- ggplot() +
   theme(legend.position = "top") +
   #gganimate code here:
   labs(title = 'Decade: {closest_state}', color = "Average Secchi Depth (m)") +
-  transition_states(decade, state_length = 1, transition_length = 0) +
+  transition_states(decade, state_length = 1, transition_length = 1) +
   enter_appear() +
   exit_disappear() 
 
