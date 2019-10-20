@@ -32,8 +32,8 @@ getwd()
 
 # install.packages("tidyverse")
 # install.packages("streamMetabolizer", dependencies = TRUE,
-                 repos = c("https://owi.usgs.gov/R", "http://cran.rstudio.com")
-                 )
+#                 repos = c("https://owi.usgs.gov/R", "http://cran.rstudio.com")
+#                 )
 
 # library(devtools)
 # install_github('streampulse/StreamPULSE')
@@ -142,15 +142,17 @@ Export <- Kan2018 %>%
   summarize(BaseflowExport_KAN = sum(baseflowexport, na.rm = T),
             QuickflowExport_KAN = sum(quickflowexport, na.rm = T),
             TotalExport_KAN = BaseflowExport_KAN + QuickflowExport_KAN)
+Export
 
 Kanplot <- ggplot(Kan2018, aes(x = DateTime_UTC, y = Discharge_m3s)) + 
   geom_line() +
-  geom_line(mapping = aes(x = DateTime_UTC, y = bt), color = "darkorange4") +
-  geom_line(mapping = aes(x = DateTime_UTC, y = qft), color = "steelblue4") +
-  labs(x = "Date Time (UTC)", y = expression("Discharge (m"^3*"/s)")) 
+  geom_line(mapping = aes(x = DateTime_UTC, y = bt, color = "darkorange4")) +
+  geom_line(mapping = aes(x = DateTime_UTC, y = qft, color = "steelblue4")) +
+  labs(x = "Date Time (UTC)", y = expression("Discharge (m"^3*"/s)")) +
+  theme(legend.title = element_blank()) +
+  scale_color_discrete(labels = c("Baseflow", "Quickflow"))
 print(Kanplot)
 ```
-
 
 11. What percentage of total water exported left as baseflow and quickflow from the Kansas River over this time period?
 
@@ -158,11 +160,11 @@ print(Kanplot)
 
 12. This is a much larger river and watershed than the 2 we investigated in class. How does the size of the watershed impact how flow is partitioned into quickflow and baseflow? 
 
-> 
+> The baseflow of the Kansas River is much larger than its quickflow, while the baseflow of Third Fork Creek and Ellerbe Creek are similar with their corresponding quickflow. Watershed with bigger area is more likely to have larger quickflow than baseflow.
 
 13. The site we are looking at is also further down in its river network (i.e. instead of being a headwater stream, this river has multiple tributaries that flow into it). How does this impact your interpretation of your results?
 
->
+> Because the site we are looking at is further down its river network, it costs more time for water to aggregate into the river. Therefore, more water will infiltrate and become groundwater, which makes the baseflow of the Kansas River is much larger thanthe quickflow.
 
 ## Chemical Hysteresis
 
@@ -175,31 +177,32 @@ KanStorm <- Kandat %>%
 KanNitrateDis <- ggplot(KanStorm,
        aes(x = Discharge_m3s, y = Nitrate_mgL, color = DateTime_Solar)) +
   labs(x = expression("Discharge (m"^3*"/s)"), y = "Nitrate (mg/L)") +
-  geom_point()
+  geom_point() +
+  theme(legend.title = element_blank())
 print(KanNitrateDis)
 ```
 
 15. Does this storm show clockwise or counterclockwise hysteresis? Was this storm a flushing or diluting storm?
 
->
+> This storm showed counterclockwise hysteresis. This storm was a flushing storm.
 
 16. What does this mean for how nitrate gets into the river from the watershed?
 
->
+> This means that nitrate gets into the river from the watershed by groundwater.
 
 ## Reflection
 17. What are 2-3 conclusions or summary points about high frequency data you learned through your analysis?
 
->
+> Streamflow can be divided into baseflow and quickflow. Baseflow usually comes from groundwater while quickflow usually comes from overlandflow and the water falling into the river channel directly. Hydrologic Flashiness can reflect whether a river responds to a precepitation event quickly. Chemical concentrations in rivers can be either highly variable with discharge (flushing or dilution), or "chemostatic", which means the concentration barely changes with discharge. 
 
 18. What data, visualizations, and/or models supported your conclusions from 17?
 
-> 
+>  Data used includes discharge data, area of watershed and nitrate data from Third Fork Creek at Woodcroft Parkway Near Blands and Ellerbe Creek at Club Boulevard at Durham, NC. Ggplot and dygraph are used to draw those conclusions.
 
 19. Did hands-on data analysis impact your learning about high frequency data relative to a theory-based lesson? If so, how?
 
->
+> Yes. Hands-on data analysis convinced me that high frequency data analysis is very useful in the research of rivers or lakes. Also it is more vivid and can help me understand the theory and master some useful tools of processing high frequency data better.
 
 20.	How did the real-world data compare with your expectations from theory?
 
->
+> Real-world data is complicated and imperfect because there are lots of factors can affect the value of real-world data. But in general, real-world data has a theoretical law.
