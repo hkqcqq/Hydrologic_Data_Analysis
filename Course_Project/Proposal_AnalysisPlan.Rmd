@@ -1,0 +1,60 @@
+---
+title: "Proposal and Analysis Plan"
+author: "Insert names of team members here"
+date: "october 25, 2019"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## What questions will your team address?
+
+1. 
+
+2. 
+
+<add more numbers as needed>
+
+## What hypotheses will your team address? 
+
+* Hypotheses should relate directly to your questions. Each numbered hypothesis should match up with the correponding numbered question. 
+* There may be multiple working hypotheses for a single question. If this is the case, note each hypothesis as 1a, 1b. etc.
+
+1. 
+
+2. 
+
+<add more numbers as needed>
+
+## What dataset(s) will your team analyze?
+
+
+
+## How will you set up and manage your project repository? 
+
+
+
+## Create a table of variables you will analyze.
+
+* Column 1: Variable
+* Column 2: Units (if known)
+* Column 3: Dependent (response) or independent (predictor) variable?
+* Column 4: To which hypothesis(es) does this variable pertain?
+
+*Note: You may not know all of the individual variables you plan to analyze at this point. It is sufficient to describe what type of variable you anticipate using (e.g., land cover) and decide on specifics later*
+
+
+
+## What tasks will your team conduct? 
+
+### Data acquisition
+
+
+### Data exploration
+
+
+### Data wrangling
+
+
+### Data analysis and visualization
