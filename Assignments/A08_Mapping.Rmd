@@ -140,21 +140,21 @@ What would you change about the legend to make it a more effective visualization
 
 ```{r}
 secchidepth.lakeareaplot <- 
-  ggplot(secchi.spatial.maine, aes(x = area, y = secchi.mean)) +
+  ggplot(secchi.spatial.maine, aes(x = log(area), y = secchi.mean)) +
   geom_point() +
-  labs(x = "Lake Area (ha)", y = "Mean Secchi Depth (m)")
+  labs(x = "Lake Area (log(ha))", y = "Mean Secchi Depth (m)")
 print(secchidepth.lakeareaplot)
 
 secchidepth.lakedepthplot <- 
-  ggplot(secchi.spatial.maine, aes(x = depth, y = secchi.mean)) +
+  ggplot(secchi.spatial.maine, aes(x = log(depth), y = secchi.mean)) +
   geom_point() +
-  labs(x = "Lake Depth (m)", y = "Mean Secchi Depth (m)")
+  labs(x = "Lake Depth (log(m))", y = "Mean Secchi Depth (m)")
 print(secchidepth.lakedepthplot)
 
-secchidepth.lakearea <- lm(data = secchi.spatial.maine, secchi.mean ~ area)
+secchidepth.lakearea <- lm(data = secchi.spatial.maine, secchi.mean ~ log(area))
 summary(secchidepth.lakearea)
 
-secchidepth.lakedepth <- lm(data = secchi.spatial.maine, secchi.mean ~ depth)
+secchidepth.lakedepth <- lm(data = secchi.spatial.maine, secchi.mean ~ log(depth))
 summary(secchidepth.lakedepth)
 ```
 
@@ -187,9 +187,12 @@ print(Waterfeaturesplot.FL)
 11. Create a map of watershed boundaries in Florida, with the layer of water features on top. Color the watersheds gray (make sure the lines separating watersheds are still visible) and color the water features by type. 
 
 ```{r}
-FLlayers <- ggplot() +
-  geom_sf(data = HUC6.FL, aes(fill = Name), color = "gray", alpha = 0.5) +
-  geom_sf(data = waterfeatures.FL) 
+FLlayers <- ggplot(waterfeatures.FL) +
+  geom_sf(data = HUC6.FL, color = "darkgray", alpha = 0.5) +
+  geom_sf(data = waterfeatures.FL) +
+  geom_sf(aes(fill = FEATURE, color = FEATURE)) +
+  scale_color_viridis_d(option = "magma", end = 0.9) +
+  scale_fill_viridis_d(option = "magma", end = 0.9)
 print(FLlayers)
 ```
 
