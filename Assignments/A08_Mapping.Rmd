@@ -48,7 +48,7 @@ library(viridis)
 
 theme_set(theme_classic())
 
-LAGOSdata <- load(file = "./Data/Raw/LAGOSdata.rda")
+load(file = "./Data/Raw/LAGOSdata.rda")
 waterfeatures <- st_read("./Data/Raw/hydrogl020.dbf")
 HUC6 <- st_read("./Data/Raw/Watersheds_Spatial/WBDHU6.dbf")
 ```
